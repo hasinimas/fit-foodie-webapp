@@ -1,0 +1,252 @@
+.dashboard-container {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+  .dashboard-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(31 41 55);
+}
+.dashboard-subtitle {
+  color: rgb(75 85 99);
+}
+.dashboard-action {
+  margin-top: 1rem;
+}
+@media (min-width: 768px) {
+  .dashboard-action {
+    margin-top: 0;
+  }
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+.nutrition-card-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgb(31 41 55);
+  margin-bottom: 1rem;
+}
+.nutrition-stats {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+  .nutrition-stats {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+}
+.stat-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+@media (min-width: 768px) {
+  .stat-card {
+    margin-bottom: 0;
+  }
+}
+.stat-card-primary {
+  background-color: rgb(236 253 245);
+}
+.stat-card-secondary {
+  background-color: rgb(219 234 254);
+}
+.stat-card-tertiary {
+  background-color: rgb(254 243 199);
+}
+.stat-icon-container {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+.stat-icon-primary {
+  background-color: rgb(209 250 229);
+}
+.stat-icon-secondary {
+  background-color: rgb(191 219 254);
+}
+.stat-icon-tertiary {
+  background-color: rgb(253 230 138);
+}
+.stat-label {
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+}
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+}
+.tip-box {
+  padding: 1rem;
+  background-color: rgb(219 234 254);
+  border-radius: 0.5rem;
+  border-left: 4px solid rgb(59 130 246);
+  margin-bottom: 1rem;
+}
+.tip-text {
+  font-size: 0.875rem;
+  color: rgb(30 58 138);
+}
+.macro-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .macro-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.macro-card {
+  padding: 1rem;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 0.5rem;
+}
+.macro-label {
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+  margin-bottom: 0.25rem;
+}
+.macro-value {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgb(31 41 55);
+}
+.quick-actions-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgb(31 41 55);
+  margin-bottom: 1rem;
+}
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: rgb(249 250 251);
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+.action-button:hover {
+  background-color: rgb(243 244 246);
+}
+.action-icon-container {
+  height: 2rem;
+  width: 2rem;
+  background-color: rgb(243 244 246);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+}
+.action-label {
+  font-weight: 500;
+}
+.action-arrow {
+  color: rgb(156 163 175);
+}
+.challenge-card {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgb(254 243 199);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(251 191 36);
+}
+.challenge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.challenge-title {
+  font-weight: 500;
+  color: rgb(31 41 55);
+}
+.challenge-badge {
+  font-size: 0.75rem;
+  background-color: rgb(253 230 138);
+  color: rgb(146 64 14);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+}
+.challenge-description {
+  font-size: 0.875rem;
+  color: rgb(75 85 99);
+  margin-bottom: 0.75rem;
+}
+.challenge-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.challenge-days {
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+}
+.meal-table {
+  width: 100%;
+}
+.table-header {
+  border-bottom: 1px solid rgb(229 231 235);
+}
+.table-header-cell {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(107 114 128);
+}
+.table-body-row {
+  border-bottom: 1px solid rgb(243 244 246);
+}
+.table-cell {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: rgb(31 41 55);
+}
+.table-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: rgb(107 114 128);
+  font-size: 0.875rem;
+}
