@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import navButton from '../components/NavButton';
 import ProgressBar from '../components/ProgressBar';
 import MoodTracker from '../components/MoodTracker';
 import { UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon, HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon } from 'lucide-react';
@@ -66,10 +67,10 @@ const Dashboard: React.FC = () => {
         return {
           greeting: "Let's focus on your calorie deficit today",
           primaryMetric: 'Calories',
-          primaryIcon: <ActivityIcon size={24} className="text-emerald-500" />,
+          primaryIcon: <ActivityIcon size={28} className="text-emerald-500" />,
           secondaryMetric: 'Steps',
           secondaryValue: '2,450 / 10,000',
-          secondaryIcon: <TrendingUpIcon size={24} className="text-blue-500" />,
+          secondaryIcon: <TrendingUpIcon size={28} className="text-blue-500" />,
           tip: 'Try to maintain a 500 calorie deficit each day for sustainable weight loss',
           quickActions: [{
             label: 'Log Meal',
@@ -220,7 +221,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className="dashboard-grid">
-          <Card className="col-span-1 md:col-span-2">
+          <Card className="col-span-1 md:col-span-1">
             <h2 className="nutrition-card-title">Today's Nutrition</h2>
             <div className="nutrition-stats">
               <div className="stat-card stat-card-primary">
@@ -351,7 +352,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className="pt-2">
-                <Button variant="outline" size="sm" fullWidth icon={<TrendingUpIcon size={16} />} onClick={() => navigate('/profile')}>
+                <Button variant="outline" size="lg" fullWidth icon={<TrendingUpIcon size={16} />} onClick={() => navigate('/profile')}>
                   View Full Progress
                 </Button>
               </div>
