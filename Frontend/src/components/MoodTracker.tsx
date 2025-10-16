@@ -43,11 +43,11 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({
       </div>
       <div className="p-5">
         <div className="mb-4 flex justify-between">
-          {moodEmojis.map(item => <button key={item.label} onClick={() => setMood(`I'm feeling ${item.label.toLowerCase()} today`)} className="flex flex-col items-center">
-              <div className="text-2xl mb-1 hover:transform hover:scale-125 transition-transform">
+          {moodEmojis.map(item => <button key={item.label} onClick={() => setMood(`I'm feeling ${item.label.toLowerCase()} today`)} className="flex flex-col items-center group px-2 py-1">
+              <div className="text-3xl mb-1 hover:transform hover:scale-150 transition-transform">  
                 {item.emoji}
               </div>
-              <span className="text-xs text-gray-600">{item.label}</span>
+              <span className="text-md text-gray-600 transition-colors duration-200 group-hover:text-emerald-500 group-hover:font-bold">{item.label}</span>
             </button>)}
         </div>
         <div className="p-4 bg-gray-50 rounded-lg mb-4">
@@ -91,3 +91,4 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({
     </div>;
 };
 export default MoodTracker;
+

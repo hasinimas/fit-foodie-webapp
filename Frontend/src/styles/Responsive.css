@@ -1,0 +1,61 @@
+/* responsive-fixes.css */
+
+/* Make all media scale down on small screens */
+img, picture, video, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* fluid container with an upper cap */
+.container, .site-container {
+  width: 100%;
+  max-width: 1200px; /* cap for large screens; tweak as needed */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
+}
+
+/* example responsive layout */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.col {
+  flex: 1 1 0%;
+  min-width: 220px; /* prevents columns from collapsing too small */
+}
+
+/* example two-column main content/layout */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+@media (min-width: 900px) {
+  .main-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* small device adjustments */
+@media (max-width: 640px) {
+  .hide-mobile { display: none !important; }
+  .text-center-mobile { text-align: center; }
+  .small-gap { gap: 0.5rem; }
+}
+
+/* typography: use rems for scaling */
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+p  { font-size: 1rem; }
+
+/* catch-all override for elements with inline widths (not ideal, but helps) */
+*[style*="width:"] {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}

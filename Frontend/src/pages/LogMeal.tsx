@@ -70,14 +70,7 @@ const LogMeal: React.FC = () => {
                     <input type="time" defaultValue="07:30" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mb-6">
-                  <Button type="button" variant="outline" icon={<CameraIcon size={16} />}>
-                    Add Photo
-                  </Button>
-                  <Button type="button" variant="outline" icon={<CameraOffIcon size={16} />}>
-                    AR Portion Estimator
-                  </Button>
-                </div>
+              
                 <Button type="submit" fullWidth icon={<SendIcon size={16} />} disabled={isAnalyzing || !mealInput.trim()}>
                   {isAnalyzing ? 'Analyzing...' : 'Analyze Meal'}
                 </Button>
@@ -209,3 +202,4 @@ const LogMeal: React.FC = () => {
     </Layout>;
 };
 export default LogMeal;
+
