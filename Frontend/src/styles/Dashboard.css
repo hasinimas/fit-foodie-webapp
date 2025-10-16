@@ -7,6 +7,11 @@
   flex-direction: column;
   margin-bottom: 1.5rem;
 }
+.nutrition-sum{
+  margin-right:3rem;
+  margin-left: -3rem;
+}
+
 @media (min-width: 768px) {
   .dashboard-header {
     flex-direction: row;
@@ -124,14 +129,20 @@
   color: rgb(31 41 55);
 }
 .tip-box {
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: rgb(219 234 254);
-  border-radius: 0.5rem;
-  border-left: 4px solid rgb(59 130 246);
-  margin-bottom: 1rem;
+  border-radius: 1rem;
+  border-left: 10px solid rgb(59 130 246);
+  margin-bottom: 3rem;
 }
+.tip-box:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  background-color: #e0f2fe;
+}
+
 .tip-text {
-  font-size: 0.875rem;
+  font-size: 0.995rem;
   color: rgb(30 58 138);
 }
 .macro-grid {
@@ -147,10 +158,18 @@
 .macro-card {
   padding: 1rem;
   border: 1px solid rgb(229 231 235);
-  border-radius: 0.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
+
+.macro-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  background-color: #f2ffff;
+}
+
 .macro-label {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: rgb(107 114 128);
   margin-bottom: 0.25rem;
 }

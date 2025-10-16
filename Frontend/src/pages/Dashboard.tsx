@@ -215,12 +215,13 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
           <div className="dashboard-action">
-            <Button icon={<PlusIcon size={16} />} onClick={() => navigate('/log-meal')}>
+            <Button icon={<PlusIcon size={18} />} onClick={() => navigate('/log-meal')}>
               Log Meal
             </Button>
           </div>
         </div>
         <div className="dashboard-grid">
+          <div className="nutrition-sum">
           <Card className="col-span-1 md:col-span-1">
             <h2 className="nutrition-card-title">Today's Nutrition</h2>
             <div className="nutrition-stats">
@@ -265,22 +266,23 @@ const Dashboard: React.FC = () => {
               <div className="macro-card">
                 <p className="macro-label">Carbs</p>
                 <p className="macro-value">{userData.progress.carbs}g / 260g</p>
-                <ProgressBar value={userData.progress.carbs} max={260} color="blue" size="sm" className="mt-2" />
+                <ProgressBar value={userData.progress.carbs} max={260} color="blue" size="md" className="mt-2" />
               </div>
               <div className="macro-card">
                 <p className="macro-label">Protein</p>
                 <p className="macro-value">
                   {userData.progress.protein}g / {userData.dailyProtein}g
                 </p>
-                <ProgressBar value={userData.progress.protein} max={userData.dailyProtein} color="emerald" size="sm" className="mt-2" />
+                <ProgressBar value={userData.progress.protein} max={userData.dailyProtein} color="emerald" size="md" className="mt-2" />
               </div>
               <div className="macro-card">
                 <p className="macro-label">Fats</p>
                 <p className="macro-value">{userData.progress.fats}g / 70g</p>
-                <ProgressBar value={userData.progress.fats} max={70} color="amber" size="sm" className="mt-2" />
+                <ProgressBar value={userData.progress.fats} max={70} color="amber" size="md" className="mt-2" />
               </div>
-            </div>
+            </div>  
           </Card>
+          </div>
           <Card>
             <h2 className="quick-actions-title">Quick Actions</h2>
             <div className="action-list">
@@ -307,7 +309,7 @@ const Dashboard: React.FC = () => {
               <ProgressBar value={2} max={5} color="amber" />
               <div className="challenge-footer">
                 <span className="challenge-days">3 days remaining</span>
-                <Button variant="outline" size="sm" onClick={() => navigate('/challenges')}>
+                <Button variant="outline" size="sm" onClick={() => navigate('/challenges')}>           
                   View Challenge
                 </Button>
               </div>
