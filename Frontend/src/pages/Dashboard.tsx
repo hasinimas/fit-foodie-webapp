@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import navButton from '../components/NavButton';
 import ProgressBar from '../components/ProgressBar';
 import MoodTracker from '../components/MoodTracker';
-import { UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon, HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon } from 'lucide-react';
+import { 
+  UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon, 
+  HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon 
+} from 'lucide-react';
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 import '../styles/Dashboard.css';
-// Define types for our data structures
+
+// Types
 interface UserProgress {
   calories: number;
   protein: number;
@@ -17,6 +22,16 @@ interface UserProgress {
   fats: number;
   fiber: number;
 }
+
+interface Meal {
+  time: string;
+  meal: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}
+
 interface UserData {
   name: string;
   goal: string;
@@ -24,12 +39,16 @@ interface UserData {
   dailyProtein: number;
   dailyWater: number;
   progress: UserProgress;
+  meals: Meal[];
+  streak: number;
 }
+
 interface QuickAction {
   label: string;
   icon: React.ReactNode;
   path: string;
 }
+
 interface GoalContent {
   greeting: string;
   primaryMetric: string;
@@ -40,26 +59,59 @@ interface GoalContent {
   tip: string;
   quickActions: QuickAction[];
 }
-// Mock user data - in a real app this would come from Firebase
-const userData: UserData = {
-  name: 'Ravi',
-  goal: 'lose-weight',
-  dailyCalories: 2100,
-  dailyProtein: 90,
-  dailyWater: 2.5,
-  progress: {
-    calories: 310,
-    protein: 12,
-    water: 0.5,
-    carbs: 44,
-    fats: 8,
-    fiber: 5
-  }
+
+// ✅ Default user data
+const defaultUserData: UserData = {
+  name: '',
+  goal: 'eat-healthier',
+  dailyCalories: 2000,
+  dailyProtein: 75,
+  dailyWater: 2,
+  progress: { calories: 0, protein: 0, water: 0, carbs: 0, fats: 0, fiber: 0 },
+  meals: [],
+  streak: 0
 };
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState<UserData>(defaultUserData);
   const [aiResponse, setAiResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch user data from Firebase and merge with defaults
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUserData({
+              ...defaultUserData,
+              name: data.firstName || defaultUserData.name,
+              goal: data.goal || defaultUserData.goal,
+              dailyCalories: data.dailyCalories || defaultUserData.dailyCalories,
+              dailyProtein: data.dailyProtein || defaultUserData.dailyProtein,
+              dailyWater: data.dailyWater || defaultUserData.dailyWater,
+              progress: data.progress || defaultUserData.progress,
+              meals: data.meals || defaultUserData.meals,
+              streak: data.streak || defaultUserData.streak
+            });
+          } else {
+            console.log('No such user document! Using defaults.');
+            setUserData(defaultUserData);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setUserData(defaultUserData);
+        }
+      }
+    };
+    fetchUserData();
+  }, []);
+
   // Goal-specific content
   const goalSpecificContent = (): GoalContent => {
     switch (userData.goal) {
@@ -72,19 +124,11 @@ const Dashboard: React.FC = () => {
           secondaryValue: '2,450 / 10,000',
           secondaryIcon: <TrendingUpIcon size={28} className="text-blue-500" />,
           tip: 'Try to maintain a 500 calorie deficit each day for sustainable weight loss',
-          quickActions: [{
-            label: 'Log Meal',
-            icon: <UtensilsIcon size={16} className="text-emerald-500" />,
-            path: '/log-meal'
-          }, {
-            label: 'Track Steps',
-            icon: <TrendingUpIcon size={16} className="text-blue-500" />,
-            path: '/activity'
-          }, {
-            label: 'View Challenge',
-            icon: <TrophyIcon size={16} className="text-amber-500" />,
-            path: '/challenges'
-          }]
+          quickActions: [
+            { label: 'Log Meal', icon: <UtensilsIcon size={16} className="text-emerald-500" />, path: '/log-meal' },
+            { label: 'Track Steps', icon: <TrendingUpIcon size={16} className="text-blue-500" />, path: '/activity' },
+            { label: 'View Challenge', icon: <TrophyIcon size={16} className="text-amber-500" />, path: '/challenges' }
+          ]
         };
       case 'gain-muscle':
         return {
@@ -95,19 +139,11 @@ const Dashboard: React.FC = () => {
           secondaryValue: '1/2 workouts',
           secondaryIcon: <TrendingUpIcon size={24} className="text-blue-500" />,
           tip: 'Aim for 1.6-2g of protein per kg of bodyweight for optimal muscle growth',
-          quickActions: [{
-            label: 'Log Meal',
-            icon: <UtensilsIcon size={16} className="text-emerald-500" />,
-            path: '/log-meal'
-          }, {
-            label: 'Log Workout',
-            icon: <ActivityIcon size={16} className="text-blue-500" />,
-            path: '/workouts'
-          }, {
-            label: 'Protein Foods',
-            icon: <TrophyIcon size={16} className="text-amber-500" />,
-            path: '/pantry'
-          }]
+          quickActions: [
+            { label: 'Log Meal', icon: <UtensilsIcon size={16} className="text-emerald-500" />, path: '/log-meal' },
+            { label: 'Log Workout', icon: <ActivityIcon size={16} className="text-blue-500" />, path: '/workouts' },
+            { label: 'Protein Foods', icon: <TrophyIcon size={16} className="text-amber-500" />, path: '/pantry' }
+          ]
         };
       case 'maintain-weight':
         return {
@@ -118,19 +154,11 @@ const Dashboard: React.FC = () => {
           secondaryValue: '7/9 vitamins',
           secondaryIcon: <HeartIcon size={24} className="text-blue-500" />,
           tip: 'Focus on nutrient diversity while maintaining your calorie balance',
-          quickActions: [{
-            label: 'Log Meal',
-            icon: <UtensilsIcon size={16} className="text-emerald-500" />,
-            path: '/log-meal'
-          }, {
-            label: 'Nutrient Report',
-            icon: <HeartIcon size={16} className="text-blue-500" />,
-            path: '/nutrients'
-          }, {
-            label: 'View Plan',
-            icon: <CalendarIcon size={16} className="text-amber-500" />,
-            path: '/meal-plan'
-          }]
+          quickActions: [
+            { label: 'Log Meal', icon: <UtensilsIcon size={16} className="text-emerald-500" />, path: '/log-meal' },
+            { label: 'Nutrient Report', icon: <HeartIcon size={16} className="text-blue-500" />, path: '/nutrients' },
+            { label: 'View Plan', icon: <CalendarIcon size={16} className="text-amber-500" />, path: '/meal-plan' }
+          ]
         };
       case 'improve-energy':
         return {
@@ -141,21 +169,12 @@ const Dashboard: React.FC = () => {
           secondaryValue: '7.5/8 hours',
           secondaryIcon: <HeartIcon size={24} className="text-blue-500" />,
           tip: 'Complex carbs provide sustained energy throughout the day',
-          quickActions: [{
-            label: 'Log Meal',
-            icon: <UtensilsIcon size={16} className="text-emerald-500" />,
-            path: '/log-meal'
-          }, {
-            label: 'Energy Foods',
-            icon: <BrainIcon size={16} className="text-blue-500" />,
-            path: '/pantry'
-          }, {
-            label: 'Track Mood',
-            icon: <HeartIcon size={16} className="text-amber-500" />,
-            path: '/mood'
-          }]
+          quickActions: [
+            { label: 'Log Meal', icon: <UtensilsIcon size={16} className="text-emerald-500" />, path: '/log-meal' },
+            { label: 'Energy Foods', icon: <BrainIcon size={16} className="text-blue-500" />, path: '/pantry' },
+            { label: 'Track Mood', icon: <HeartIcon size={16} className="text-amber-500" />, path: '/mood' }
+          ]
         };
-      case 'eat-healthier':
       default:
         return {
           greeting: 'Focus on nutrient-dense foods today',
@@ -165,26 +184,19 @@ const Dashboard: React.FC = () => {
           secondaryValue: '3/5 servings',
           secondaryIcon: <DropletIcon size={24} className="text-blue-500" />,
           tip: 'Try to include at least 5 different colored vegetables and fruits today',
-          quickActions: [{
-            label: 'Log Meal',
-            icon: <UtensilsIcon size={16} className="text-emerald-500" />,
-            path: '/log-meal'
-          }, {
-            label: 'Nutrition Report',
-            icon: <HeartIcon size={16} className="text-blue-500" />,
-            path: '/nutrients'
-          }, {
-            label: 'Healthy Recipes',
-            icon: <CalendarIcon size={16} className="text-amber-500" />,
-            path: '/meal-plan'
-          }]
+          quickActions: [
+            { label: 'Log Meal', icon: <UtensilsIcon size={16} className="text-emerald-500" />, path: '/log-meal' },
+            { label: 'Nutrition Report', icon: <HeartIcon size={16} className="text-blue-500" />, path: '/nutrients' },
+            { label: 'Healthy Recipes', icon: <CalendarIcon size={16} className="text-amber-500" />, path: '/meal-plan' }
+          ]
         };
     }
   };
+
   const goalContent = goalSpecificContent();
+
   const handleMoodSubmit = (mood: string) => {
     setIsLoading(true);
-    // Simulate API call to get AI response
     setTimeout(() => {
       setIsLoading(false);
       if (mood.toLowerCase().includes('happy') || mood.toLowerCase().includes('good')) {
@@ -200,167 +212,102 @@ const Dashboard: React.FC = () => {
       }
     }, 1500);
   };
-  return <Layout>
+
+  return (
+    <Layout>
       <div className="dashboard-container">
+        {/* Header */}
         <div className="dashboard-header">
           <div>
             <h1 className="dashboard-title">Welcome, {userData.name}!</h1>
             <p className="dashboard-subtitle">
-              {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric'
-            })}{' '}
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}{' '}
               • {goalContent.greeting}
             </p>
           </div>
           <div className="dashboard-action">
-            <Button icon={<PlusIcon size={18} />} onClick={() => navigate('/log-meal')}>
-              Log Meal
-            </Button>
+            <Button icon={<PlusIcon size={18} />} onClick={() => navigate('/log-meal')}>Log Meal</Button>
           </div>
         </div>
+
+        {/* Nutrition & Quick Actions */}
         <div className="dashboard-grid">
           <div className="nutrition-sum">
-          <Card className="col-span-1 md:col-span-1">
-            <h2 className="nutrition-card-title">Today's Nutrition</h2>
-            <div className="nutrition-stats">
-              <div className="stat-card stat-card-primary">
-                <div className="stat-icon-container stat-icon-primary">
-                  {goalContent.primaryIcon}
+            <Card className="col-span-1 md:col-span-1">
+              <h2 className="nutrition-card-title">Today's Nutrition</h2>
+              <div className="nutrition-stats">
+                <div className="stat-card stat-card-primary">
+                  <div className="stat-icon-container stat-icon-primary">{goalContent.primaryIcon}</div>
+                  <div>
+                    <p className="stat-label">{goalContent.primaryMetric}</p>
+                    <p className="stat-value">{userData.progress.calories} / {userData.dailyCalories}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="stat-label">{goalContent.primaryMetric}</p>
-                  <p className="stat-value">
-                    {userData.progress.calories} / {userData.dailyCalories}
-                  </p>
+                <div className="stat-card stat-card-secondary">
+                  <div className="stat-icon-container stat-icon-secondary">{goalContent.secondaryIcon}</div>
+                  <div>
+                    <p className="stat-label">{goalContent.secondaryMetric}</p>
+                    <p className="stat-value">{goalContent.secondaryValue}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="stat-card stat-card-secondary">
-                <div className="stat-icon-container stat-icon-secondary">
-                  {goalContent.secondaryIcon}
-                </div>
-                <div>
-                  <p className="stat-label">{goalContent.secondaryMetric}</p>
-                  <p className="stat-value">{goalContent.secondaryValue}</p>
-                </div>
-              </div>
-              <div className="stat-card stat-card-tertiary">
-                <div className="stat-icon-container stat-icon-tertiary">
-                  <DropletIcon size={24} className="text-amber-500" />
-                </div>
-                <div>
-                  <p className="stat-label">Water</p>
-                  <p className="stat-value">
-                    {userData.progress.water}L / {userData.dailyWater}L
-                  </p>
+                <div className="stat-card stat-card-tertiary">
+                  <div className="stat-icon-container stat-icon-tertiary"><DropletIcon size={24} className="text-amber-500" /></div>
+                  <div>
+                    <p className="stat-label">Water</p>
+                    <p className="stat-value">{userData.progress.water}L / {userData.dailyWater}L</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="tip-box">
-              <p className="tip-text">
-                <span className="font-medium">Tip:</span> {goalContent.tip}
-              </p>
-            </div>
-            <div className="macro-grid">
-              <div className="macro-card">
-                <p className="macro-label">Carbs</p>
-                <p className="macro-value">{userData.progress.carbs}g / 260g</p>
-                <ProgressBar value={userData.progress.carbs} max={260} color="blue" size="md" className="mt-2" />
+
+              {/* Tip */}
+              <div className="tip-box"><p className="tip-text"><span className="font-medium">Tip:</span> {goalContent.tip}</p></div>
+
+              {/* Macros */}
+              <div className="macro-grid">
+                <div className="macro-card">
+                  <p className="macro-label">Carbs</p>
+                  <p className="macro-value">{userData.progress.carbs}g / 260g</p>
+                  <ProgressBar value={userData.progress.carbs} max={260} color="blue" size="md" className="mt-2" />
+                </div>
+                <div className="macro-card">
+                  <p className="macro-label">Protein</p>
+                  <p className="macro-value">{userData.progress.protein}g / {userData.dailyProtein}g</p>
+                  <ProgressBar value={userData.progress.protein} max={userData.dailyProtein} color="emerald" size="md" className="mt-2" />
+                </div>
+                <div className="macro-card">
+                  <p className="macro-label">Fats</p>
+                  <p className="macro-value">{userData.progress.fats}g / 70g</p>
+                  <ProgressBar value={userData.progress.fats} max={70} color="amber" size="md" className="mt-2" />
+                </div>
               </div>
-              <div className="macro-card">
-                <p className="macro-label">Protein</p>
-                <p className="macro-value">
-                  {userData.progress.protein}g / {userData.dailyProtein}g
-                </p>
-                <ProgressBar value={userData.progress.protein} max={userData.dailyProtein} color="emerald" size="md" className="mt-2" />
-              </div>
-              <div className="macro-card">
-                <p className="macro-label">Fats</p>
-                <p className="macro-value">{userData.progress.fats}g / 70g</p>
-                <ProgressBar value={userData.progress.fats} max={70} color="amber" size="md" className="mt-2" />
-              </div>
-            </div>  
-          </Card>
+            </Card>
           </div>
+
+          {/* Quick Actions */}
           <Card>
             <h2 className="quick-actions-title">Quick Actions</h2>
             <div className="action-list">
-              {goalContent.quickActions.map((action, index) => <button key={index} onClick={() => navigate(action.path)} className="action-button">
+              {goalContent.quickActions.map((action, index) => (
+                <button key={index} onClick={() => navigate(action.path)} className="action-button">
                   <div className="flex items-center">
                     <div className="action-icon-container">{action.icon}</div>
                     <span className="action-label">{action.label}</span>
                   </div>
                   <ChevronRightIcon size={16} className="action-arrow" />
-                </button>)}
-            </div>
-            <div className="challenge-card">
-              <div className="challenge-header">
-                <h3 className="challenge-title">Active Challenge</h3>
-                <span className="challenge-badge">In Progress</span>
-              </div>
-              <p className="challenge-description">
-                {userData.goal === 'lose-weight' && 'Track all meals for 5 days straight'}
-                {userData.goal === 'gain-muscle' && 'Hit your protein goal for 5 days'}
-                {userData.goal === 'maintain-weight' && 'Maintain calorie balance for 7 days'}
-                {userData.goal === 'improve-energy' && 'Drink 2.5L water for 5 days'}
-                {userData.goal === 'eat-healthier' && 'Eat 5 servings of vegetables for 3 days'}
-              </p>
-              <ProgressBar value={2} max={5} color="amber" />
-              <div className="challenge-footer">
-                <span className="challenge-days">3 days remaining</span>
-                <Button variant="outline" size="sm" onClick={() => navigate('/challenges')}>           
-                  View Challenge
-                </Button>
-              </div>
+                </button>
+              ))}
             </div>
           </Card>
         </div>
+
+        {/* Mood Tracker & Progress */}
         <div className="dashboard-grid">
           <div className="md:col-span-2">
             <MoodTracker onSubmitMood={handleMoodSubmit} aiResponse={aiResponse} isLoading={isLoading} />
           </div>
-          <Card>
-            <h2 className="quick-actions-title">Your Progress</h2>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">
-                    {userData.goal === 'lose-weight' && 'Weight Loss'}
-                    {userData.goal === 'gain-muscle' && 'Muscle Gain'}
-                    {userData.goal === 'maintain-weight' && 'Consistency'}
-                    {userData.goal === 'improve-energy' && 'Energy Level'}
-                    {userData.goal === 'eat-healthier' && 'Nutrition Score'}
-                  </span>
-                  <span className="text-sm font-medium text-emerald-600">
-                    +12%
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full">
-                  <div className="h-2 bg-emerald-500 rounded-full" style={{
-                  width: '45%'
-                }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">Streak</span>
-                  <span className="text-sm font-medium text-emerald-600">
-                    5 days
-                  </span>
-                </div>
-                <div className="flex justify-between space-x-1">
-                  {[1, 2, 3, 4, 5, 6, 7].map(day => <div key={day} className={`h-8 flex-1 rounded ${day <= 5 ? 'bg-emerald-500' : 'bg-gray-200'}`}></div>)}
-                </div>
-              </div>
-              <div className="pt-2">
-                <Button variant="outline" size="lg" fullWidth icon={<TrendingUpIcon size={16} />} onClick={() => navigate('/profile')}>
-                  View Full Progress
-                </Button>
-              </div>
-            </div>
-          </Card>
         </div>
+
+        {/* Meal History */}
         <Card>
           <h2 className="nutrition-card-title">Meal History</h2>
           <div className="overflow-x-auto">
@@ -376,27 +323,29 @@ const Dashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="table-body-row">
-                  <td className="table-cell">7:30 AM</td>
-                  <td className="table-cell">
-                    Oats with banana, boiled egg, green tea
-                  </td>
-                  <td className="table-cell">310 kcal</td>
-                  <td className="table-cell">12g</td>
-                  <td className="table-cell">44g</td>
-                  <td className="table-cell">8g</td>
-                </tr>
-                <tr>
-                  <td colSpan={6} className="table-empty">
-                    No other meals logged today
-                  </td>
-                </tr>
+                {userData.meals.length > 0 ? (
+                  userData.meals.map((meal, index) => (
+                    <tr key={index} className="table-body-row">
+                      <td className="table-cell">{meal.time}</td>
+                      <td className="table-cell">{meal.meal}</td>
+                      <td className="table-cell">{meal.calories} kcal</td>
+                      <td className="table-cell">{meal.protein}g</td>
+                      <td className="table-cell">{meal.carbs}g</td>
+                      <td className="table-cell">{meal.fats}g</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="table-empty">No meals logged today</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </Card>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
-export default Dashboard;
 
+export default Dashboard;
