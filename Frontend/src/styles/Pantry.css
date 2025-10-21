@@ -396,3 +396,142 @@
   background-color: rgb(254 243 199);
   color: rgb(146 64 14);
 }
+
+.enhanced-popup {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: 400px;
+  max-width: 90%;
+  animation: popupFade 0.25s ease-in-out;
+}
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.popup-field label {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.quantity-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-btn {
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+
+.grocery-add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  align-items: center;
+}
+
+.grocery-add-form input,
+.grocery-add-form select {
+  flex: 1 1 150px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+}
+
+.grocery-add-form button {
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.grocery-add-form button:hover {
+  background-color: #059669;
+}
+
+.pantry-table th,
+.pantry-table td {
+  text-align: center; /* Center content */
+  padding: 0.75rem 1rem;
+}
+
+.pantry-table th {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.pantry-table td {
+  background-color: #ffffff;
+  color: #111827;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pantry-table tr:hover td {
+  background-color: #f9fafb;
+}
+
+.pantry-actions-cell button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+  transition: transform 0.1s;
+}
+
+.pantry-actions-cell button:hover {
+  transform: scale(1.1);
+}
+
+.pantry-actions-cell button.decrease {
+  background-color: #f87171; /* red */
+  color: white;
+}
+
+.pantry-actions-cell button.increase {
+  background-color: #34d399; /* green */
+  color: white;
+}
