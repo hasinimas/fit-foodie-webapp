@@ -74,6 +74,88 @@ const Pantry: React.FC = () => {
   checked: false,
 });
 
+    // Nearby grocery stores states
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [nearbyStores, setNearbyStores] = useState<
+      { id: number; name: string; distance: number; description: string; lat: number; lng: number }[]
+    >([]);
+    const [loadingStores, setLoadingStores] = useState(false);
+
+    // Grocery stores near Colombo (example dataset)
+   // Will fetch from OpenStreetMap (Nominatim)
+  const [storeList, setStoreList] = useState<any[]>([]);
+
+
+    // Calculate distance using Haversine formula
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * (Math.PI / 180)) *
+          Math.cos(lat2 * (Math.PI / 180)) *
+          Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
+
+    // Fetch user location & nearby stores
+   const getNearbyStores = async () => {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+
+      setLoadingStores(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+
+          try {
+            // Fetch nearby grocery/supermarkets
+            //OpenStreetMap (OSM) / Nominatim API
+            const radius = 0.1; // ~10km range around user
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=supermarket&bounded=1&viewbox=${longitude - radius},${latitude + radius},${longitude + radius},${latitude - radius}&limit=15`
+            );
+
+            const data = await res.json();
+
+            // Map data and calculate distance
+            const stores = data.map((place: any, index: number) => ({
+              id: index + 1,
+              name: place.display_name.split(",")[0],
+              lat: parseFloat(place.lat),
+              lng: parseFloat(place.lon),
+              description: place.display_name,
+              distance: calculateDistance(latitude, longitude, parseFloat(place.lat), parseFloat(place.lon)),
+            }));
+
+            stores.sort((a: any, b: any) => a.distance - b.distance);
+            setNearbyStores(stores);
+          } catch (error) {
+            console.error("Failed to fetch nearby stores:", error);
+            alert("Unable to fetch stores. Please try again later.");
+          } finally {
+            setLoadingStores(false);
+          }
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+          alert("Unable to fetch your location. Please enable GPS.");
+          setLoadingStores(false);
+        }
+      );
+    };
+
+
+    // Auto-fetch nearby stores when grocery tab loads
+    useEffect(() => {
+      getNearbyStores();
+    }, []);
+
 
   const user = auth.currentUser;
 
@@ -367,7 +449,60 @@ const Pantry: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-            </Card>
+
+              {/* 🗺️ Nearby Grocery Stores Section */}
+    
+              <div className="mt-8">
+                <h2 className="grocery-title mb-3">Nearby Grocery Stores</h2>
+
+                {loadingStores ? (
+                  <p>Fetching nearby stores...</p>
+                ) : nearbyStores.length > 0 ? (
+                  <div className="grocery-options mt-4">
+                    {nearbyStores.map((store) => (
+                      <div key={store.id} className="grocery-option">
+                        <div className="grocery-option-header">
+                          <h3 className="grocery-option-title">{store.name}</h3>
+                          <span
+                            className={`distance-badge ${
+                              store.distance < 1
+                                ? 'distance-close'
+                                : store.distance < 3
+                                ? 'distance-medium'
+                                : 'distance-far'
+                            }`}
+                          >
+                            {store.distance.toFixed(1)} km away
+                          </span>
+                        </div>
+                        <p className="grocery-option-description">{store.description}</p>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            fullWidth
+                            onClick={() => {
+                              if (!userLocation) {
+                                alert("Location not available");
+                                return;
+                              }
+                              // Create a free Google Maps directions link
+                              const directionsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}/@${store.lat},${store.lng},15z`;
+                              window.open(directionsUrl, "_blank");
+                            }}
+                          >
+                            View Store Directions
+                          </Button>
+
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 mt-3">
+                    Please enable location access to find nearby stores.
+                  </p>
+                )}
+              </div>
+                      </Card>
           )}
 
 
