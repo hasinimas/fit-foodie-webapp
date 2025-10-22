@@ -9,6 +9,7 @@ import {
   UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon, 
   HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon 
 } from 'lucide-react';
+// @ts-ignore
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import '../styles/Dashboard.css';
