@@ -280,6 +280,7 @@ const MealPlan: React.FC = () => {
 
         {/* Day selector */}
         <div className="mb-6 overflow-x-auto">
+
           <div className="inline-flex space-x-3">
             {(plan.length ? plan.map((p) => p.day) : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]).map((label, idx) => {
               const isActive = idx === activeDay;
@@ -310,13 +311,16 @@ const MealPlan: React.FC = () => {
               <div className="h-12 w-12 bg-emerald-50 rounded-full flex items-center justify-center mr-3">
                 <CalendarIcon size={20} className="text-emerald-500" />
               </div>
+
               <div>
                 <h2 className="font-semibold text-xl text-gray-900">{activePlan ? activePlan.day : "Day"}'s Meals</h2>
                 <div className="text-sm text-gray-500">{activePlan ? "Personalized by AI" : "No plan loaded"}</div>
               </div>
+
             </div>
             <div className="text-sm text-gray-600">Total: ~{totalCaloriesForDay || 0} calories</div>
           </div>
+
 
           {/* Table view */}
           <div className="w-full overflow-x-auto">
@@ -413,7 +417,7 @@ const MealPlan: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <h3 className="font-medium text-gray-800 mb-3">Daily Targets</h3>
+              <h3 className="font-medium text-gray-800 dark:text-white 600  mb-3">Daily Targets</h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">

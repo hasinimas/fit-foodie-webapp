@@ -92,6 +92,7 @@ const LogMeal: React.FC = () => {
     } finally { setBusy(false); }
   };
 
+
   // Analyze — server will check >=3 meals rule, call Nutritionix and return analysis;
   // If server returns plan in response, we will use it.
   const handleAnalyze = async () => {
@@ -238,6 +239,7 @@ const LogMeal: React.FC = () => {
 
                 <div className="flex justify-end gap-3">
                   <Button onClick={handleGeneratePlan} icon={<InfoIcon size={14} />}>Generate Meal Plan</Button>
+
                 </div>
               </div>
             )}

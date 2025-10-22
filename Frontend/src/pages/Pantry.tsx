@@ -334,7 +334,7 @@ const Pantry: React.FC = () => {
       calories: 320,
       time: '20 min',
       color: 'purple',
-      icon: <CoffeeIcon size={24} className="text-purple-600" />,
+      icon: <CoffeeIcon size={24} className="text-purple-600 " />,
       mainIngredients: ['Oats', 'Eggs', 'Banana'],
     },
   ];
@@ -345,6 +345,7 @@ const Pantry: React.FC = () => {
         <div className="pantry-header">
           <div>
             <h1 className="pantry-title">Smart Pantry</h1>
+            
             <p className="pantry-subtitle">Track your groceries and plan your shopping</p>
           </div>
 
@@ -545,7 +546,7 @@ const Pantry: React.FC = () => {
                 <div className="ai-suggestion">
                   <div className="ai-suggestion-content">
                     <div className="ai-avatar">
-                      <span className="font-bold text-blue-600">AI</span>
+                      <span className="font-bold text-blue-600 dark:text-white-600 ">AI</span>
                     </div>
                     <div>
                       <p className="ai-message">

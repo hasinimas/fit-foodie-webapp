@@ -294,87 +294,76 @@
 }
 
 
-.sidebar {
-  width: 250px; /* 🔹 wider sidebar */
-  background: linear-gradient(180deg, #f8fafc, #e0f2fe);
-  padding: 1rem 0.75rem;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #dbeafe;
-  transition: width 0.3s ease;
-}
 
-
-/* --- tab / nav item styling --- */
-.nav-item {
-  display: flex;
-  align-items: center;
-  padding: 0.9rem 1.25rem; /* 🔹 slightly larger tab height & padding */
-  margin-bottom: 0.5rem;
-  border-radius: 0.75rem;
-  color: #1e293b;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.nav-item:hover {
-  background: linear-gradient(90deg, #bae6fd, #f0f9ff);
-  transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* --- active tab --- */
-.nav-item.active {
-  background: linear-gradient(90deg, #34d399, #059669); /* green gradient */
-  color: white;
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3); /* soft green shadow */
-}
-
-/* --- icon spacing inside tabs --- */
-.nav-item svg {
-  margin-right: 12px;
-  width: 20px;
-  height: 20px;
-}
-
-/* --- side navbar buttons --- */
-.nav-button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0.9rem 1.25rem;
-  border-radius: 0.75rem;
-  background: #f8fafc;
-  color: #1e293b;
-  font-weight: 500;
-  border: none;
-  text-align: left;
-  transition: all 0.25s ease;
-  cursor: pointer;
-}
-
-.nav-button:hover {
-  background: linear-gradient(90deg, #bbf7d0, #86efac);
-  color: #065f46;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-}
-
-.nav-button.active {
-  background: linear-gradient(90deg, #34d399, #059669);
-  color: white;
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
-}
-
-.nav-button .icon {
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-}
 
 .nav-button .label {
   font-size: 1rem;
+}
+/* --- DARK MODE: DASHBOARD CONTENT --- */
+
+.dark .dashboard-title,
+.dark .nutrition-card-title,
+.dark .quick-actions-title,
+.dark .macro-value,
+.dark .stat-value,
+.dark .table-cell {
+  color: rgb(243 244 246);
+}
+
+.dark .dashboard-subtitle,
+.dark .stat-label,
+.dark .macro-label,
+.dark .action-arrow,
+.dark .table-header-cell,
+.dark .table-empty {
+  color: rgb(156 163 175);
+}
+
+.dark .stat-card-primary {
+  background-color: #422006;
+}
+.dark .stat-card-secondary {
+  background-color: #2e1045;
+}
+.dark .stat-card-tertiary {
+  background-color: #0c243f;
+}
+
+.dark .tip-box {
+  background-color: rgb(30 41 55);
+  border-left-color: rgb(37 99 235);
+}
+
+.dark .tip-box:hover {
+  background-color: rgb(55 65 81);
+}
+
+.dark .tip-text {
+  color: rgb(219 234 254);
+}
+
+.dark .macro-card {
+  border-color: rgb(55 65 81);
+  box-shadow: none;
+}
+
+.dark .macro-card:hover {
+  background-color: rgb(31 41 55);
+}
+
+.dark .action-button {
+  background-color: rgb(55 65 81);
+}
+
+.dark .action-button:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+}
+
+.dark .action-icon-container {
+  background-color: rgb(75 85 99);
+}
+
+.dark .action-label {
+  color: rgb(249 250 251);
 }
 
