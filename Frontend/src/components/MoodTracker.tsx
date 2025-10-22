@@ -34,9 +34,9 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({
     emoji: '😴',
     label: 'Tired'
   }];
-  return <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-        <h3 className="font-medium text-gray-800 flex items-center">
+  return <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 className="font-medium text-gray-800  dark:text-white flex items-center">
           <MessageCircleIcon size={18} className="mr-2 text-emerald-500" />
           AI Mood Check
         </h3>
@@ -47,11 +47,11 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({
               <div className="text-3xl mb-1 hover:transform hover:scale-150 transition-transform">  
                 {item.emoji}
               </div>
-              <span className="text-md text-gray-600 transition-colors duration-200 group-hover:text-emerald-500 group-hover:font-bold">{item.label}</span>
+              <span className="text-md text-gray-600  transition-colors duration-200 group-hover:text-emerald-500 group-hover:font-bold">{item.label}</span>
             </button>)}
         </div>
-        <div className="p-4 bg-gray-50 rounded-lg mb-4">
-          <p className="text-gray-600 mb-3">
+        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4">
+          <p className="text-gray-600 dark:text-gray-300 mb-3">
             How are you feeling today? Your mood affects your nutrition needs.
           </p>
           <form onSubmit={handleSubmit} className="flex">
@@ -80,7 +80,7 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({
               }}></div>
                   </div> : <>
                     <p className="text-gray-800">{aiResponse}</p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500  mt-1">
                       Based on your mood, I've adjusted today's recommendations.
                     </p>
                   </>}
