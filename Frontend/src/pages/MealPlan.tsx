@@ -44,19 +44,19 @@ const MealPlan: React.FC = () => {
   }
   return <Layout>
       <div className="max-w-5xl mx-auto">
-        <button onClick={() => history.back()} className="flex items-center text-gray-600 hover:text-gray-800 mb-6">
+        <button onClick={() => history.back()} className="flex items-center text-gray-600 hover:text-gray-800 text-gray 600 dark:text-white 500 mb-6 ">
           <ChevronLeftIcon size={20} />
           <span className="ml-1">Back to Dashboard</span>
         </button>
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Your Meal Plan</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white 500">Your Meal Plan</h1>
           <Button variant="outline" icon={<div style={{width:16, height:16}} />}>
             Regenerate Plan
           </Button>
         </div>
         <div className="mb-6 overflow-x-auto">
           <div className="flex space-x-2 pb-2">
-            {days.map((day, index) => <button key={index} onClick={() => setActiveDay(index)} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeDay === index ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+            {days.map((day, index) => <button key={index} onClick={() => setActiveDay(index)} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeDay === index ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200   '  }`}>
                 {day}
               </button>)}
           </div>
@@ -67,7 +67,7 @@ const MealPlan: React.FC = () => {
               <div className="h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center">
                 <CalendarIcon size={20} className="text-emerald-500" />
               </div>
-              <h2 className="ml-3 font-bold text-xl text-gray-800">
+              <h2 className="ml-3 font-bold text-xl text-gray-800 dark:text-white 600 ">
                 {days[activeDay]}'s Meals
               </h2>
             </div>
@@ -82,7 +82,7 @@ const MealPlan: React.FC = () => {
                             {index + 1}
                           </span>}
                       </div>
-                      <h3 className="ml-2 font-medium text-gray-800 capitalize">
+                      <h3 className="ml-2 font-medium text-gray-800  dark:text-white 500 capitalize">
                         {mealTime}
                       </h3>
                     </div>
@@ -91,15 +91,15 @@ const MealPlan: React.FC = () => {
                     </span>
                   </div>
                   <div className="ml-8">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-gray-800">
+                    <div className="flex justify-between items-start dark:text-white 600 mb-2">
+                      <h4 className="font-medium text-gray-800 dark:text-white 600 ">
                         {meal.title}
                       </h4>
                       <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
                         {meal.protein}g protein
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <p className="text-sm text-gray-600 dark:text-white 600  mb-3">
                       {meal.description}
                     </p>
                     <div className="flex space-x-2">
@@ -118,19 +118,19 @@ const MealPlan: React.FC = () => {
         </Card>
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-xl text-gray-800">
+            <h2 className="font-bold text-xl text-gray-800 dark:text-white 600 ">
               Nutritional Insights
             </h2>
-            <div className="text-sm text-gray-500">Based on your goals</div>
+            <div className="text-sm text-gray-500 dark:text-white 600 ">Based on your goals</div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <h3 className="font-medium text-gray-800 mb-3">Daily Targets</h3>
+              <h3 className="font-medium text-gray-800 dark:text-white 600  mb-3">Daily Targets</h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Calories</span>
-                    <span className="text-gray-800">1,290 / 2,100 kcal</span>
+                    <span className="text-gray-600 dark:text-white 600 ">Calories</span>
+                    <span className="text-gray-800 dark:text-white 500">1,290 / 2,100 kcal</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-emerald-500 h-2 rounded-full" style={{
@@ -140,8 +140,8 @@ const MealPlan: React.FC = () => {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Protein</span>
-                    <span className="text-gray-800">44 / 90 g</span>
+                    <span className="text-gray-600 dark:text-white 600 ">Protein</span>
+                    <span className="text-gray-800 dark:text-white 500">44 / 90 g</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-blue-500 h-2 rounded-full" style={{
@@ -151,8 +151,8 @@ const MealPlan: React.FC = () => {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Carbs</span>
-                    <span className="text-gray-800">156 / 260 g</span>
+                    <span className="text-gray-600 dark:text-white 600 ">Carbs</span>
+                    <span className="text-gray-800 dark:text-white 500">156 / 260 g</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-amber-500 h-2 rounded-full" style={{
@@ -162,8 +162,8 @@ const MealPlan: React.FC = () => {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Fats</span>
-                    <span className="text-gray-800">42 / 70 g</span>
+                    <span className="text-gray-600 dark:text-white 600 ">Fats</span>
+                    <span className="text-gray-800 dark:text-white 500">42 / 70 g</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-purple-500 h-2 rounded-full" style={{
@@ -174,7 +174,7 @@ const MealPlan: React.FC = () => {
               </div>
             </div>
             <div className="p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-gray-800 mb-3">
+              <h3 className="font-medium text-gray-800 dark:text-white 600  mb-3">
                 AI Recommendations
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">

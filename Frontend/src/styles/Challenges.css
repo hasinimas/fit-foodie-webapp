@@ -436,3 +436,102 @@
   color: rgb(75 85 99);
   margin-top: 0.25rem;
 }
+
+
+/* --- Keep Specific Yellow Backgrounds in Dark Mode --- */
+
+/* Keep the unlocked badge yellow */
+.dark .badge-card-unlocked {
+  background-color: rgb(254 243 199) !important; /* Force yellow-100 */
+  border-color: rgb(251 191 36) !important; /* Force amber-400 */
+}
+/* Keep text inside unlocked badge dark for contrast */
+.dark .badge-card-unlocked .badge-title {
+    color: rgb(31 41 55) !important; /* Force gray-800 */
+}
+.dark .badge-card-unlocked .badge-description {
+    color: rgb(107 114 128) !important; /* Force gray-500 */
+}
+
+/* Keep the 'amber' active challenge card yellow */
+/* This relies on the TSX adding `bg-amber-100` class to the Card */
+.dark .challenge-card.bg-amber-100 {
+    background-color: rgb(254 243 199) !important; /* Force yellow-100 */
+    border-color: #fcd34d !important; /* Force amber-300 border or similar*/
+}
+
+/* Make text inside the yellow active challenge card dark */
+.dark .challenge-card.bg-amber-100 .challenge-title,
+.dark .challenge-card.bg-amber-100 .challenge-description,
+.dark .challenge-card.bg-amber-100 .text-sm.text-gray-500 {
+    color: rgb(55 65 81) !important; /* Force gray-700 */
+}
+
+/* Style the footer inside the yellow active challenge card */
+.dark .challenge-card.bg-amber-100 .challenge-footer {
+    background-color: rgb(253 230 138) !important; /* Force yellow-200 */
+}
+.dark .challenge-card.bg-amber-100 .reminder-icon-container {
+    background-color: rgb(254 243 199) !important; /* Force yellow-100 */
+}
+.dark .challenge-card.bg-amber-100 .reminder-text {
+    color: rgb(146 64 14) !important; /* Force amber-700 */
+}
+.dark .challenge-card.bg-amber-100 .reminder-icon-container .text-gray-600 { /* Target icon */
+     color: rgb(146 64 14) !important; /* Force amber-700 */
+}
+
+/* Ensure the 'In Progress' badge contrasts on yellow */
+.dark .challenge-card.bg-amber-100 .challenge-status-active {
+    background-color: rgb(219 234 254) !important; /* Force blue-100 */
+    color: rgb(30 64 175) !important; /* Force blue-800 */
+}
+/* --- End of Specific Yellow Background Fix --- */
+
+/* --- Fix Specific Text Colors in Dark Mode --- */
+
+.dark .challenges-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .challenges-subtitle {
+  color: #d1d5db; /* gray-300 */
+}
+
+/* Ensure challenge titles within cards are white */
+.dark .challenge-card .challenge-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+/* --- End Specific Text Color Fix --- */
+/* --- Fix Available Challenge Card Text in Dark Mode --- */
+
+.dark .available-challenge-card .available-challenge-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .available-challenge-card .available-challenge-description {
+  color: #d1d5db; /* gray-300 */
+}
+
+/* Ensure points text in the header is light */
+.dark .available-challenge-card .available-challenge-header .points-text {
+  color: #d1d5db; /* gray-300 */
+}
+
+/* Optional: Make sure difficulty badge text remains dark for contrast */
+.dark .difficulty-easy { color: #065f46; } /* Dark green text on light green bg */
+.dark .difficulty-medium { color: #92400e; } /* Dark amber text on light yellow bg */
+.dark .difficulty-hard { color: #991b1b; } /* Dark red text on light red bg */
+
+
+/* --- Stronger Fix for Completed Challenge Item Text --- */
+
+.dark .completed-challenge-item .completed-challenge-title {
+  color: #f9fafb !important; /* gray-50, with !important */
+}
+
+.dark .completed-challenge-item .completed-challenge-description {
+  color: #d1d5db !important; /* gray-300, with !important */
+}
+
