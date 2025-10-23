@@ -1,95 +1,122 @@
 import { db } from "../config/firebase.js";
 import { generateAIPlan } from "../services/mealPlanAI.js";
+import { analyzeWithNutritionix } from "../services/nutritionixAPI.js";
+import dotenv from "dotenv";
 
-//  Log a user meal (breakfast/lunch/dinner)
+dotenv.config();
+
+// ✅ Log a meal
 export const logMeal = async (req, res) => {
   try {
     const { userId, mealType, mealText } = req.body;
-
-    if (!userId || !mealType || !mealText) {
+    if (!userId || !mealType || !mealText)
       return res.status(400).json({ error: "Missing required fields." });
-    }
 
-    // Save meal to Firestore
     await db.collection("users").doc(userId).collection("meals").add({
       mealType,
       mealText,
       createdAt: new Date().toISOString(),
     });
 
-    return res.json({
-      message: `✅ ${mealType} logged successfully! Please log at least 3 meals (breakfast, lunch, dinner) before analyzing.`,
+    res.json({
+      message: ` ${mealType} logged successfully! Log breakfast, lunch & dinner to analyze.`,
     });
   } catch (err) {
-    console.error("Error logging meal:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to log meal." });
   }
 };
 
-// Analyze user's logged meals (show nutrition only after 3 meals)
+// Analyze nutrition using Nutritionix API
 export const analyzeMeals = async (req, res) => {
   try {
     const { userId } = req.params;
-    const mealSnapshot = await db
+    const mealSnap = await db
       .collection("users")
       .doc(userId)
       .collection("meals")
       .orderBy("createdAt", "desc")
       .get();
 
-    const meals = mealSnapshot.docs.map(doc => doc.data());
-
-    if (meals.length < 3) {
+    const meals = mealSnap.docs.map((d) => d.data());
+    if (meals.length < 3)
       return res.json({
-        message:
-          `🍽️ You've logged ${meals.length} meals. Please log at least 3 (breakfast, lunch, dinner) to view your nutrition analysis.`,
+        message: `🍽️ Logged ${meals.length} meals. Need 3 to analyze.`,
         meals,
       });
-    }
 
-    // Simple nutrition summary simulation (for demo)
+    const allFoods = meals.map((m) => m.mealText).join(", ");
+    const url = "https://trackapi.nutritionix.com/v2/natural/nutrients";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-app-id": process.env.NUTRITIONIX_APP_ID,
+        "x-app-key": process.env.NUTRITIONIX_APP_KEY,
+      },
+      body: JSON.stringify({ query: allFoods }),
+    });
+
+    const data = await response.json();
+    if (!data.foods) throw new Error("Nutritionix failed.");
+
+    const totalCalories = data.foods.reduce((a, f) => a + f.nf_calories, 0);
+    const totalProtein = data.foods.reduce((a, f) => a + f.nf_protein, 0);
+    const totalCarbs = data.foods.reduce((a, f) => a + f.nf_total_carbohydrate, 0);
+    const totalFat = data.foods.reduce((a, f) => a + f.nf_total_fat, 0);
+
     const analysis = {
       totalMeals: meals.length,
-      avgCalories: 1450,
-      protein: "55g",
-      carbs: "160g",
-      fats: "40g",
+      calories: totalCalories.toFixed(1),
+      protein: `${totalProtein.toFixed(1)}`,
+      carbs: `${totalCarbs.toFixed(1)}`,
+      fats: `${totalFat.toFixed(1)}`,
     };
 
-    return res.json({
-      message: "✅ Nutrition Analysis Ready",
-      analysis,
-      meals,
-    });
+    res.json({ message: " Nutrition analysis ready!", analysis, meals });
   } catch (err) {
-    console.error("Error analyzing meals:", err);
-    res.status(500).json({ error: "Failed to analyze meals." });
+    console.error(err);
+    res.status(500).json({ error: "Nutrition analysis failed." });
   }
 };
 
-//  Generate AI-based weekly meal plan
+//  Generate AI meal plan via Gemini API (with Firestore safety fix)
 export const generateMealPlan = async (req, res) => {
   try {
     const { userId } = req.params;
-    if (!userId) return res.status(400).json({ error: "Missing userId." });
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId." });
+    }
 
-    const plan = await generateAIPlan(userId);
+    // Get onboarding preferences if available
+    const userDoc = await db.collection("users").doc(userId).get();
+    const onboarding = userDoc.data()?.onboarding || {};
 
-    await db
-      .collection("users")
-      .doc(userId)
-      .collection("mealPlans")
-      .add({
+    // Generate 7-day plan from Gemini
+    const plan = await generateAIPlan(userId, onboarding);
+
+    // If Gemini failed, DO NOT save to Firestore
+    if (!plan || plan.error) {
+      return res.json({
+        message: "⚠️ Gemini returned empty or invalid plan.",
         plan,
-        createdAt: new Date().toISOString(),
       });
+    }
 
-    return res.json({
-      message: "✅ AI Meal Plan generated successfully!",
+    // ✅ Save only valid plan to Firestore
+    await db.collection("users").doc(userId).collection("mealPlans").add({
+      plan,
+      createdAt: new Date().toISOString(),
+    });
+
+    res.json({
+      message: "✅ AI Meal Plan Generated!",
       plan,
     });
+
   } catch (err) {
-    console.error("Error generating AI plan:", err);
-    res.status(500).json({ error: "Failed to generate meal plan." });
+    console.error("❌ Error generating meal plan:", err.message || err);
+    return res.status(500).json({ error: err.message || "Meal plan generation failed." });
   }
 };
