@@ -284,7 +284,7 @@ const Challenges: React.FC = () => {
           </div>}
         {/* Completed challenges */}
         {selectedFilter === 'completed' && <Card>
-            <h2 className="font-bold text-lg text-gray-800 mb-4">
+            <h2  className="font-bold text-lg text-gray-800 dark:text-white -300  mb-4">
               Completed Challenges
             </h2>
             {completedChallenges.length === 0 ? <div className="empty-challenges">
@@ -323,7 +323,7 @@ const Challenges: React.FC = () => {
           </Card>}
         {/* Badges */}
         {selectedFilter === 'badges' && <Card>
-            <h2 className="font-bold text-lg text-gray-800 mb-6">
+            <h2 className="font-bold text-lg text-gray-800 dark:text-white -300 mb-6">
               Your Badges
             </h2>
             <div className="badges-grid">

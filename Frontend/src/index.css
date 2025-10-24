@@ -3,3 +3,10 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 /* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
+/* ▼▼▼ ADD THIS CODE BLOCK ▼▼▼ */
+@layer base {
+  body {
+    @apply bg-gray-100 dark:bg-gray-900;
+    @apply transition-colors duration-300;
+  }
+}
