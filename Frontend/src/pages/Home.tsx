@@ -7,7 +7,7 @@ const Home: React.FC = () => {
   return <div className="min-h-screen bg-white">
       <Navbar />
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-emerald-50 to-blue-50 py-20">
+     <section className="relative bg-gradient-to-b from-emerald-100 via-teal-50 to-green-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="md:w-1/2 mb-10 md:mb-0">

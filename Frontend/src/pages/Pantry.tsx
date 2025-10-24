@@ -1,22 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { ShoppingBagIcon, PlusIcon, XIcon, CheckIcon, SearchIcon, ChevronDownIcon, UtensilsIcon, AppleIcon, EggIcon, CakeIcon, CoffeeIcon, SaladIcon, TimerIcon, FlameIcon } from 'lucide-react';
+import {
+  ShoppingBagIcon,
+  PlusIcon,
+  XIcon,
+  CheckIcon,
+  SearchIcon,
+  ChevronDownIcon,
+  FlameIcon,
+  TimerIcon,
+  CakeIcon,
+  AppleIcon,
+  CoffeeIcon,
+} from 'lucide-react';
 import '../styles/Pantry.css';
+import { db, auth } from '../firebaseConfig';
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+
+interface PantryItem {
+  id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  expiresIn: string;
+  expiryDate: string;
+}
+
 interface GroceryItem {
-  id: number;
+  id: string;
   name: string;
   category: string;
   checked: boolean;
 }
-interface PantryItem {
-  id: number;
-  name: string;
-  category: string;
-  quantity: string;
-  expiresIn: string;
-}
+
 interface RecipeCard {
   id: number;
   title: string;
@@ -28,167 +54,319 @@ interface RecipeCard {
   icon: React.ReactNode;
   mainIngredients: string[];
 }
+
 const Pantry: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('grocery');
-  const groceryItems: GroceryItem[] = [{
-    id: 1,
-    name: 'Chickpeas',
-    category: 'Legumes',
-    checked: false
-  }, {
-    id: 2,
-    name: 'Brown Rice',
-    category: 'Grains',
-    checked: false
-  }, {
-    id: 3,
-    name: 'Quinoa',
-    category: 'Grains',
-    checked: false
-  }, {
-    id: 4,
-    name: 'Bell Peppers',
-    category: 'Vegetables',
-    checked: false
-  }, {
-    id: 5,
-    name: 'Spinach',
-    category: 'Vegetables',
-    checked: false
-  }, {
-    id: 6,
-    name: 'Carrots',
-    category: 'Vegetables',
-    checked: false
-  }, {
-    id: 7,
-    name: 'Onions',
-    category: 'Vegetables',
-    checked: false
-  }, {
-    id: 8,
-    name: 'Turmeric',
-    category: 'Spices',
-    checked: false
-  }, {
-    id: 9,
-    name: 'Cumin',
-    category: 'Spices',
-    checked: false
-  }, {
-    id: 10,
-    name: 'Olive Oil',
-    category: 'Oils',
-    checked: false
-  }];
-  const [items, setItems] = useState<GroceryItem[]>(groceryItems);
-  const toggleItem = (id: number) => {
-    setItems(items.map(item => item.id === id ? {
-      ...item,
-      checked: !item.checked
-    } : item));
+  const [activeTab, setActiveTab] = useState<'grocery' | 'pantry' | 'recipes'>('grocery');
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+  const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newItem, setNewItem] = useState({
+    name: '',
+    category: '',
+    quantity: 1,
+    expiryDate: '',
+  });
+
+  const [newGroceryItem, setNewGroceryItem] = useState({
+  name: '',
+  category: '',
+  checked: false,
+});
+
+    // Nearby grocery stores states
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [nearbyStores, setNearbyStores] = useState<
+      { id: number; name: string; distance: number; description: string; lat: number; lng: number }[]
+    >([]);
+    const [loadingStores, setLoadingStores] = useState(false);
+
+    // Grocery stores near Colombo (example dataset)
+   // Will fetch from OpenStreetMap (Nominatim)
+  const [storeList, setStoreList] = useState<any[]>([]);
+
+
+    // Calculate distance using Haversine formula
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * (Math.PI / 180)) *
+          Math.cos(lat2 * (Math.PI / 180)) *
+          Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
+
+    // Fetch user location & nearby stores
+   const getNearbyStores = async () => {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+
+      setLoadingStores(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+
+          try {
+            // Fetch nearby grocery/supermarkets
+            //OpenStreetMap (OSM) / Nominatim API
+            const radius = 0.1; // ~10km range around user
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=supermarket&bounded=1&viewbox=${longitude - radius},${latitude + radius},${longitude + radius},${latitude - radius}&limit=15`
+            );
+
+            const data = await res.json();
+
+            // Map data and calculate distance
+            const stores = data.map((place: any, index: number) => ({
+              id: index + 1,
+              name: place.display_name.split(",")[0],
+              lat: parseFloat(place.lat),
+              lng: parseFloat(place.lon),
+              description: place.display_name,
+              distance: calculateDistance(latitude, longitude, parseFloat(place.lat), parseFloat(place.lon)),
+            }));
+
+            stores.sort((a: any, b: any) => a.distance - b.distance);
+            setNearbyStores(stores);
+          } catch (error) {
+            console.error("Failed to fetch nearby stores:", error);
+            alert("Unable to fetch stores. Please try again later.");
+          } finally {
+            setLoadingStores(false);
+          }
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+          alert("Unable to fetch your location. Please enable GPS.");
+          setLoadingStores(false);
+        }
+      );
+    };
+
+
+    // Auto-fetch nearby stores when grocery tab loads
+    useEffect(() => {
+      getNearbyStores();
+    }, []);
+
+
+  const user = auth.currentUser;
+
+  // Real-time listeners
+  useEffect(() => {
+    if (!user) return;
+
+    const pantryRef = collection(db, 'users', user.uid, 'pantry');
+    const groceryRef = collection(db, 'users', user.uid, 'grocery');
+
+    const unsubscribePantry = onSnapshot(pantryRef, (snapshot) => {
+      const pantryData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as PantryItem),
+      }));
+      setPantryItems(pantryData);
+    });
+
+    const unsubscribeGrocery = onSnapshot(groceryRef, (snapshot) => {
+      const groceryData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as GroceryItem),
+      }));
+      setGroceryItems(groceryData);
+    });
+
+    return () => {
+      unsubscribePantry();
+      unsubscribeGrocery();
+    };
+  }, [user]);
+
+  /* save a grocery item to Firebase */
+  const handleAddGroceryItem = async () => {
+  if (!user) return;
+
+  if (!newGroceryItem.name || !newGroceryItem.category) {
+    alert("Please fill Name and Category.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'users', user.uid, 'grocery'), {
+      ...newGroceryItem,
+      createdAt: serverTimestamp(),
+    });
+    setNewGroceryItem({ name: '', category: '', checked: false });
+    alert("Grocery item added ✔");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add grocery item.");
+  }
+};
+
+
+  const handleAddItem = async () => {
+    if (!user) return;
+    if (!newItem.name || !newItem.category || !newItem.expiryDate) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    const expiresIn = calculateExpiresIn(newItem.expiryDate);
+
+    try {
+      await addDoc(collection(db, 'users', user.uid, 'pantry'), {
+        ...newItem,
+        expiresIn,
+        createdAt: serverTimestamp(),
+      });
+      setShowPopup(false);
+      setNewItem({ name: '', category: '', quantity: 1, expiryDate: '' });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add item.');
+    }
   };
-  const pantryItems: PantryItem[] = [{
-    id: 101,
-    name: 'Oats',
-    category: 'Grains',
-    quantity: '500g',
-    expiresIn: '2 months'
-  }, {
-    id: 102,
-    name: 'Eggs',
-    category: 'Dairy & Eggs',
-    quantity: '6',
-    expiresIn: '1 week'
-  }, {
-    id: 103,
-    name: 'Green Tea',
-    category: 'Beverages',
-    quantity: '20 bags',
-    expiresIn: '6 months'
-  }, {
-    id: 104,
-    name: 'Bananas',
-    category: 'Fruits',
-    quantity: '3',
-    expiresIn: '3 days'
-  }, {
-    id: 105,
-    name: 'Peanut Butter',
-    category: 'Spreads',
-    quantity: '250g',
-    expiresIn: '3 months'
-  }, {
-    id: 106,
-    name: 'Apples',
-    category: 'Fruits',
-    quantity: '4',
-    expiresIn: '1 week'
-  }];
-  // Recipe suggestion data
-  const recipeCards: RecipeCard[] = [{
-    id: 1,
-    title: 'Banana Oatmeal Breakfast',
-    description: 'A nutritious breakfast using oats, banana, and optional egg for extra protein.',
-    status: 'All ingredients available',
-    calories: 310,
-    time: '15 min',
-    color: 'amber',
-    icon: <CakeIcon size={24} className="text-amber-600" />,
-    mainIngredients: ['Oats', 'Banana', 'Egg']
-  }, {
-    id: 2,
-    title: 'Apple & PB Energy Bites',
-    description: 'Quick energy snack combining apples, peanut butter, and oats.',
-    status: 'All ingredients available',
-    calories: 180,
-    time: '10 min',
-    color: 'emerald',
-    icon: <AppleIcon size={24} className="text-emerald-600" />,
-    mainIngredients: ['Apple', 'Peanut Butter', 'Oats']
-  }, {
-    id: 3,
-    title: 'Chickpea & Vegetable Curry',
-    description: "Hearty vegetarian curry that's perfect with quinoa or brown rice.",
-    status: 'Missing 3 ingredients',
-    calories: 380,
-    time: '30 min',
-    color: 'blue',
-    icon: <div style={{width:24, height:24}} className="text-blue-600" />,
-    mainIngredients: ['Chickpeas', 'Vegetables', 'Spices']
-  }, {
-    id: 4,
-    title: 'Oatmeal Protein Pancakes',
-    description: 'High-protein breakfast pancakes using oats, eggs, and banana.',
-    status: 'Missing 1 ingredient',
-    calories: 320,
-    time: '20 min',
-    color: 'purple',
-    icon: <CoffeeIcon size={24} className="text-purple-600" />,
-    mainIngredients: ['Oats', 'Eggs', 'Banana']
-  }];
-  const getExpiryClass = (expiresIn: string): string => {
+
+  const increaseQuantity = async (itemId: string) => {
+    if (!user) return;
+    const item = pantryItems.find((i) => i.id === itemId);
+    if (!item) return;
+    const itemRef = doc(db, 'users', user.uid, 'pantry', itemId);
+    await updateDoc(itemRef, { quantity: item.quantity + 1 });
+  };
+
+  const reduceQuantity = async (itemId: string) => {
+  if (!user) return;
+
+  const item = pantryItems.find((i) => i.id === itemId);
+  if (!item) return;
+
+  const itemRef = doc(db, 'users', user.uid, 'pantry', itemId);
+  const newQuantity = item.quantity - 1;
+
+  try {
+    if (newQuantity <= 0) {
+      // Check if item already exists in grocery
+      const groceryRef = collection(db, 'users', user.uid, 'grocery');
+      const existing = groceryItems.find(g => g.name === item.name && g.category === item.category);
+
+      if (existing) {
+        // Optionally: do nothing or update something
+        // For example, reset checked to false
+        const existingRef = doc(db, 'users', user.uid, 'grocery', existing.id);
+        await updateDoc(existingRef, { checked: false });
+      } else {
+        // Add to grocery
+        await addDoc(groceryRef, {
+          name: item.name,
+          category: item.category,
+          checked: false,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Delete from pantry
+      await deleteDoc(itemRef);
+    } else {
+      await updateDoc(itemRef, { quantity: newQuantity });
+    }
+  } catch (error) {
+    console.error("Failed to decrease quantity:", error);
+  }
+};
+
+
+  const calculateExpiresIn = (dateString: string) => {
+    const today = new Date();
+    const expiry = new Date(dateString);
+    const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    if (diffDays <= 3) return `${diffDays} days`;
+    if (diffDays <= 7) return '1 week';
+    return `${Math.ceil(diffDays / 30)} months`;
+  };
+
+  const getExpiryClass = (expiresIn: string) => {
     if (expiresIn.includes('day')) return 'expiry-soon';
     if (expiresIn.includes('week')) return 'expiry-medium';
     return 'expiry-good';
   };
-  return <Layout>
+
+  const filteredPantry = pantryItems.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Dummy recipe suggestions (can be dynamic later)
+  const recipeCards: RecipeCard[] = [
+    {
+      id: 1,
+      title: 'Banana Oatmeal Breakfast',
+      description: 'A nutritious breakfast using oats, banana, and optional egg.',
+      status: 'All ingredients available',
+      calories: 310,
+      time: '15 min',
+      color: 'amber',
+      icon: <CakeIcon size={24} className="text-amber-600" />,
+      mainIngredients: ['Oats', 'Banana', 'Egg'],
+    },
+    {
+      id: 2,
+      title: 'Apple & PB Energy Bites',
+      description: 'Quick energy snack combining apples, peanut butter, and oats.',
+      status: 'All ingredients available',
+      calories: 180,
+      time: '10 min',
+      color: 'emerald',
+      icon: <AppleIcon size={24} className="text-emerald-600" />,
+      mainIngredients: ['Apple', 'Peanut Butter', 'Oats'],
+    },
+    {
+      id: 3,
+      title: 'Oatmeal Protein Pancakes',
+      description: 'High-protein breakfast pancakes using oats, eggs, and banana.',
+      status: 'Missing 1 ingredient',
+      calories: 320,
+      time: '20 min',
+      color: 'purple',
+      icon: <CoffeeIcon size={24} className="text-purple-600 " />,
+      mainIngredients: ['Oats', 'Eggs', 'Banana'],
+    },
+  ];
+
+  return (
+    <Layout>
       <div className="pantry-container">
         <div className="pantry-header">
           <div>
             <h1 className="pantry-title">Smart Pantry</h1>
-            <p className="pantry-subtitle">
-              Track your groceries and plan your shopping
-            </p>
+            
+            <p className="pantry-subtitle">Track your groceries and plan your shopping</p>
           </div>
+
           <div className="pantry-actions">
             <div className="search-container">
-              <input type="text" placeholder="Search items..." className="search-input" />
+              <input
+                type="text"
+                placeholder="Search items from pantry"
+                className="search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
               <SearchIcon size={16} className="search-icon" />
             </div>
-            <Button icon={<PlusIcon size={16} />}>Add Item</Button>
+            <Button icon={<PlusIcon size={16} />} onClick={() => setShowPopup(true)}>
+              Add Item To Pantry
+            </Button>
           </div>
         </div>
+
+        {/* -------- Tabs -------- */}
         <div className="tabs-container">
           <button className={`tab-button ${activeTab === 'grocery' ? 'active' : ''}`} onClick={() => setActiveTab('grocery')}>
             Grocery List
@@ -200,169 +378,200 @@ const Pantry: React.FC = () => {
             Recipe Suggestions
           </button>
         </div>
-        {activeTab === 'grocery' && <>
-            <Card className="mb-6">
-              <div className="grocery-header">
-                <div className="grocery-title-container">
-                  <ShoppingBagIcon size={20} className="grocery-icon" />
-                  <h2 className="grocery-title">Grocery List</h2>
-                </div>
-                <div>
-                  <Button size="sm" variant="outline">
-                    Clear All
-                  </Button>
-                </div>
-              </div>
-              <div className="select-all-row">
-                <label className="select-all-label">
-                  <input type="checkbox" className="select-all-checkbox" />
-                  <span className="select-all-text">Select All</span>
-                </label>
-                <span className="items-count">{items.length} items</span>
-              </div>
-              <div className="space-y-1">
-                {items.map(item => <div key={item.id} className="grocery-item">
-                    <div className="item-details">
-                      <input type="checkbox" checked={item.checked} onChange={() => toggleItem(item.id)} className="item-checkbox" />
-                      <span className={`item-name ${item.checked ? 'checked' : ''}`}>
-                        {item.name}
-                      </span>
-                    </div>
-                    <div className="item-meta">
-                      <span className="item-category">{item.category}</span>
-                      <button className="delete-button">
-                        <XIcon size={16} />
-                      </button>
-                    </div>
-                  </div>)}
-              </div>
-              <div className="grocery-actions">
-                <Button variant="outline" icon={<PlusIcon size={16} />}>
-                  Add Item
-                </Button>
-                <Button>Mark Selected as Purchased</Button>
-              </div>
-            </Card>
+
+        {/* -------- Grocery Tab -------- */}
+        {activeTab === 'grocery' && (
             <Card>
-              <div className="grocery-header">
-                <h2 className="grocery-title">Local Grocery Options</h2>
-                <Button size="sm" variant="outline">
-                  Refresh
-                </Button>
+              <h2>Grocery List</h2>
+
+              {/* Add Grocery Item Form */}
+              <div className="grocery-add-form">
+                <input
+                  type="text"
+                  placeholder="Item Name"
+                  value={newGroceryItem.name}
+                  onChange={(e) =>
+                    setNewGroceryItem({ ...newGroceryItem, name: e.target.value })
+                  }
+                />
+                <select
+                  value={newGroceryItem.category}
+                  onChange={(e) =>
+                    setNewGroceryItem({ ...newGroceryItem, category: e.target.value })
+                  }
+                >
+                  <option value="">Select Category</option>
+                  <option value="Fruits">🍎 Fruits</option>
+                  <option value="Vegetables">🥦 Vegetables</option>
+                  <option value="Dairy">🥛 Dairy</option>
+                  <option value="Snacks">🍪 Snacks</option>
+                  <option value="Drinks">☕ Drinks</option>
+                  <option value="Other">🧂 Other</option>
+                </select>
+                <button onClick={handleAddGroceryItem}>Add</button>
               </div>
-              <div className="grocery-options">
-                <div className="grocery-option">
-                  <div className="grocery-option-header">
-                    <h3 className="grocery-option-title">Kandy Fresh Market</h3>
-                    <span className="distance-badge distance-close">
-                      0.8 km away
-                    </span>
-                  </div>
-                  <p className="grocery-option-description">
-                    All items available • Best price for vegetables
-                  </p>
-                  <Button size="sm" variant="outline" fullWidth>
-                    View Store Details
-                  </Button>
-                </div>
-                <div className="grocery-option">
-                  <div className="grocery-option-header">
-                    <h3 className="grocery-option-title">Organic Grocers</h3>
-                    <span className="distance-badge distance-medium">
-                      1.2 km away
-                    </span>
-                  </div>
-                  <p className="grocery-option-description">
-                    8/10 items available • Best quality organic produce
-                  </p>
-                  <Button size="sm" variant="outline" fullWidth>
-                    View Store Details
-                  </Button>
-                </div>
-                <div className="grocery-option">
-                  <div className="grocery-option-header">
-                    <h3 className="grocery-option-title">City Supermarket</h3>
-                    <span className="distance-badge distance-medium">
-                      2.5 km away
-                    </span>
-                  </div>
-                  <p className="grocery-option-description">
-                    All items available • Best price overall
-                  </p>
-                  <Button size="sm" variant="outline" fullWidth>
-                    View Store Details
-                  </Button>
-                </div>
+
+              <div className="overflow-x-auto">
+                <table className="pantry-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Category</th>
+                      <th>Purchased</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groceryItems.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.name}</td>
+                        <td>{item.category}</td>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={item.checked}
+                            onChange={async () => {
+                              const itemRef = doc(db, 'users', user.uid, 'grocery', item.id);
+                              await updateDoc(itemRef, { checked: !item.checked });
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <button
+                            onClick={async () => {
+                              await deleteDoc(doc(db, 'users', user.uid, 'grocery', item.id));
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </Card>
-          </>}
-        {activeTab === 'pantry' && <Card>
-            <div className="grocery-header">
-              <h2 className="grocery-title">My Pantry Items</h2>
-              <Button size="sm" icon={<PlusIcon size={14} />}>
-                Add Item
-              </Button>
-            </div>
+
+              {/* 🗺️ Nearby Grocery Stores Section */}
+    
+              <div className="mt-8">
+                <h2 className="grocery-title mb-3">Nearby Grocery Stores</h2>
+
+                {loadingStores ? (
+                  <p>Fetching nearby stores...</p>
+                ) : nearbyStores.length > 0 ? (
+                  <div className="grocery-options mt-4">
+                    {nearbyStores.map((store) => (
+                      <div key={store.id} className="grocery-option">
+                        <div className="grocery-option-header">
+                          <h3 className="grocery-option-title">{store.name}</h3>
+                          <span
+                            className={`distance-badge ${
+                              store.distance < 1
+                                ? 'distance-close'
+                                : store.distance < 3
+                                ? 'distance-medium'
+                                : 'distance-far'
+                            }`}
+                          >
+                            {store.distance.toFixed(1)} km away
+                          </span>
+                        </div>
+                        <p className="grocery-option-description">{store.description}</p>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            fullWidth
+                            onClick={() => {
+                              if (!userLocation) {
+                                alert("Location not available");
+                                return;
+                              }
+                              // Create a free Google Maps directions link
+                              const directionsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}/@${store.lat},${store.lng},15z`;
+                              window.open(directionsUrl, "_blank");
+                            }}
+                          >
+                            View Store Directions
+                          </Button>
+
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 mt-3">
+                    Please enable location access to find nearby stores.
+                  </p>
+                )}
+              </div>
+                      </Card>
+          )}
+
+
+        {/* -------- Pantry Tab -------- */}
+        {activeTab === 'pantry' && (
+          <Card>
             <div className="overflow-x-auto">
               <table className="pantry-table">
-                <thead className="pantry-table-header">
+                <thead>
                   <tr>
-                    <th className="pantry-table-header-cell">Item</th>
-                    <th className="pantry-table-header-cell">Category</th>
-                    <th className="pantry-table-header-cell">Quantity</th>
-                    <th className="pantry-table-header-cell">Expires In</th>
-                    <th className="pantry-table-header-cell">Actions</th>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Expires In</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {pantryItems.map(item => <tr key={item.id} className="pantry-table-row">
-                      <td className="pantry-table-cell">{item.name}</td>
-                      <td className="pantry-table-cell">{item.category}</td>
-                      <td className="pantry-table-cell">{item.quantity}</td>
-                      <td className="pantry-table-cell">
+                  {filteredPantry.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.name}</td>
+                      <td>{item.category}</td>
+                      <td>{item.quantity}</td>
+                      <td>
                         <span className={`expiry-badge ${getExpiryClass(item.expiresIn)}`}>
                           {item.expiresIn}
                         </span>
                       </td>
                       <td className="pantry-actions-cell">
-                        <button className="pantry-action-button">
-                          <ChevronDownIcon size={16} />
-                        </button>
+                        <button onClick={() => reduceQuantity(item.id)}>-</button>
+                        <button onClick={() => increaseQuantity(item.id)}>+</button>
                       </td>
-                    </tr>)}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-            </div>
-            <div className="ai-suggestion">
-              <div className="ai-suggestion-content">
-                <div className="ai-avatar">
-                  <span className="font-bold text-blue-600">AI</span>
-                </div>
-                <div>
-                  <p className="ai-message">
-                    <span className="ai-title">Expiring Soon:</span> Your
-                    bananas will expire in 3 days. Consider using them in a
-                    smoothie or freezing them for later use.
-                  </p>
-                  <p className="ai-tip">
-                    Tip: Based on your pantry, you could make banana oatmeal
-                    cookies with your current ingredients.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Card>}
-        {activeTab === 'recipes' && <Card>
-            <h2 className="grocery-title mb-4">Recipe Suggestions</h2>
-            <p className="pantry-subtitle mb-6">
-              Based on your pantry items and dietary preferences
-            </p>
-            <div className="recipe-grid">
-              {recipeCards.map(recipe => <div key={recipe.id} className={`recipe-card border-${recipe.color}-200`}>
-                  <div className={`recipe-header bg-gradient-to-br from-${recipe.color}-100 to-${recipe.color}-200`}>
-                    <div className={`recipe-icon-container bg-${recipe.color}-50`}>
-                      {recipe.icon}
+
+              {/* AI Tips */}
+              {filteredPantry.length > 0 && (
+                <div className="ai-suggestion">
+                  <div className="ai-suggestion-content">
+                    <div className="ai-avatar">
+                      <span className="font-bold text-blue-600 dark:text-white-600 ">AI</span>
                     </div>
+                    <div>
+                      <p className="ai-message">
+                        <span className="ai-title">Expiring Soon:</span> Some items are nearing expiry. Use them soon!
+                      </p>
+                      <p className="ai-tip">
+                        Tip: Combine fruits and oats for a healthy snack.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* -------- Recipes Tab -------- */}
+        {activeTab === 'recipes' && (
+          <Card>
+            <h2 className="grocery-title mb-4">Recipe Suggestions</h2>
+            <div className="recipe-grid">
+              {recipeCards.map((recipe) => (
+                <div key={recipe.id} className={`recipe-card border-${recipe.color}-200`}>
+                  <div className={`recipe-header bg-gradient-to-br from-${recipe.color}-100 to-${recipe.color}-200`}>
+                    <div className={`recipe-icon-container bg-${recipe.color}-50`}>{recipe.icon}</div>
                     <div className="recipe-info">
                       <h3 className="recipe-title">{recipe.title}</h3>
                       <div className="recipe-meta">
@@ -379,26 +588,88 @@ const Pantry: React.FC = () => {
                   </div>
                   <div className="recipe-content">
                     <div className="recipe-ingredients">
-                      {recipe.mainIngredients.map((ingredient, idx) => <span key={idx} className={`recipe-ingredient bg-${recipe.color}-50 text-${recipe.color}-700`}>
-                          {ingredient}
-                        </span>)}
+                      {recipe.mainIngredients.map((ing, idx) => (
+                        <span key={idx} className={`recipe-ingredient bg-${recipe.color}-50 text-${recipe.color}-700`}>
+                          {ing}
+                        </span>
+                      ))}
                     </div>
                     <p className="recipe-description">{recipe.description}</p>
                     <div className="recipe-footer">
                       <span className={`recipe-status ${recipe.status.includes('All') ? 'status-available' : 'status-missing'}`}>
                         {recipe.status}
                       </span>
-                      <Button size="sm" variant="outline">
-                        View Recipe
-                      </Button>
+                      <Button size="sm" variant="outline">View Recipe</Button>
                     </div>
                   </div>
-                </div>)}
+                </div>
+              ))}
             </div>
-          </Card>}
+          </Card>
+        )}
+
+        {/* -------- Add Item Popup -------- */}
+        {showPopup && (
+          <div className="popup-overlay">
+            <div className="popup-container enhanced-popup">
+              <h2 className="popup-title">🧺 Add New Pantry Item</h2>
+              <div className="popup-form">
+                <div className="popup-field">
+                  <label>Item Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Milk"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    className="popup-input"
+                  />
+                </div>
+                <div className="popup-field">
+                  <label>Category</label>
+                  <select
+                    value={newItem.category}
+                    onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                    className="popup-input"
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Fruits">🍎 Fruits</option>
+                    <option value="Vegetables">🥦 Vegetables</option>
+                    <option value="Dairy">🥛 Dairy</option>
+                    <option value="Snacks">🍪 Snacks</option>
+                    <option value="Drinks">☕ Drinks</option>
+                    <option value="Other">🧂 Other</option>
+                  </select>
+                </div>
+                <div className="popup-field">
+                  <label>Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newItem.quantity}
+                    onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
+                    className="popup-input"
+                  />
+                </div>
+                <div className="popup-field">
+                  <label>Expiry Date</label>
+                  <input
+                    type="date"
+                    value={newItem.expiryDate}
+                    onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
+                    className="popup-input"
+                  />
+                </div>
+                <div className="popup-actions">
+                  <Button onClick={handleAddItem} icon={<CheckIcon size={16} />}>Save Item</Button>
+                  <Button variant="outline" onClick={() => setShowPopup(false)} icon={<XIcon size={16} />}>Cancel</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default Pantry;
-
-

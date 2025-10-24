@@ -3,6 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CreditCardIcon, LockIcon, CheckCircleIcon, ArrowLeftIcon, ShieldIcon, InfoIcon } from 'lucide-react';
 import Button from '../components/Button';
 import '../styles/PaymentProcess.css';
+import { Visa, Mastercard, Amex, Discover } from "react-pay-icons";
+import { Btc } from "react-pay-icons/crypto";
+
 interface PaymentPlan {
   name: string;
   price: string;
@@ -271,12 +274,24 @@ const PaymentProcess: React.FC = () => {
                   <span>Encrypted Data</span>
                 </div>
               </div>
-              <div className="payment-cards">
-                <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/visa.svg" alt="Visa" />
-                <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/mastercard.svg" alt="Mastercard" />
-                <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/amex.svg" alt="American Express" />
-                <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/discover.svg" alt="Discover" />
-              </div>
+              
+             {/* 
+                <div className="payment-cards">
+                  <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/visa.svg" alt="Visa" />
+                  <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/mastercard.svg" alt="Mastercard" />
+                  <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/amex.svg" alt="American Express" />
+                  <img src="https://cdn.jsdelivr.net/gh/stephenhutchings/microns@master/svg/discover.svg" alt="Discover" />
+                </div>
+                */}
+               
+            {/* npm install react-pay-icons */}
+            <div className="payment-cards">
+              <Visa style={{ margin: 10, width: 60 }} />
+              <Mastercard style={{ margin: 10, width: 60 }} />
+              <Amex style={{ margin: 10, width: 60 }} />
+              <Discover style={{ margin: 10, width: 60 }} />
+            </div>
+
             </> : <div className="payment-success">
               <div className="success-icon">
                 <CheckCircleIcon size={48} />

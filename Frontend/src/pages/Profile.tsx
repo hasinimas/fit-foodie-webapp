@@ -8,8 +8,8 @@ const Profile: React.FC = () => {
   return <Layout>
       <div className="max-w-5xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Your Profile</h1>
-          <p className="text-gray-600">View and manage your account details</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white 500 ">Your Profile</h1>
+          <p className="text-gray-600 dark:text-white 500">View and manage your account details</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <Card className="md:col-span-1">
@@ -17,10 +17,10 @@ const Profile: React.FC = () => {
               <div className="h-24 w-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                 <UserIcon size={40} className="text-emerald-500" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white 500  mb-1">
                 Ravi Kumar
               </h2>
-              <p className="text-gray-600 mb-4">Kandy, Sri Lanka</p>
+              <p className="text-gray-600  dark:text-white 500 mb-4">Kandy, Sri Lanka</p>
               <div className="flex space-x-2 mb-6">
                 <Button size="sm" variant="outline" icon={<EditIcon size={14} />}>
                   Edit Profile
@@ -28,16 +28,16 @@ const Profile: React.FC = () => {
                 <Button size="sm" variant="outline" icon={<SettingsIcon size={14} />}>
                   Settings
                 </Button>
-              </div>
-              <div className="w-full p-3 bg-gray-50 rounded-lg mb-4">
+              </div><div className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
+              
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">Member Since</span>
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm text-gray-600  dark:text-white 500 ">Member Since</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-white 500 ">
                     May 2023
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-white 500 ">
                     Challenge Points
                   </span>
                   <span className="text-sm font-medium text-amber-600">
@@ -46,18 +46,18 @@ const Profile: React.FC = () => {
                 </div>
               </div>
               <div className="w-full">
-                <h3 className="font-medium text-gray-800 text-left mb-2">
+                <h3 className="font-medium text-gray-800 text-left dark:text-white 500 mb-2">
                   Connected Apps
                 </h3>
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
-                    <span className="text-sm text-gray-700">Google Fit</span>
+                  <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <span className="text-sm text-gray-700 dark:text-white 500 ">Google Fit</span>
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                       Connected
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-                    <span className="text-sm text-gray-700">Apple Health</span>
+                  <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <span className="text-sm text-gray-700 dark:text-white 500 ">Apple Health</span>
                     <Button size="sm" variant="ghost">
                       Connect
                     </Button>
@@ -68,7 +68,7 @@ const Profile: React.FC = () => {
           </Card>
           <Card className="md:col-span-2">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-bold text-lg text-gray-800">
+              <h2 className="font-bold text-lg text-gray-800 dark:text-white 500">
                 Weight Goal Progress
               </h2>
               <Button size="sm" variant="outline" icon={<TrendingUpIcon size={14} />}>
@@ -79,7 +79,7 @@ const Profile: React.FC = () => {
               <div className="flex justify-between mb-2">
                 <div>
                   <span className="text-sm text-gray-500">Starting</span>
-                  <p className="font-medium text-gray-800">75 kg</p>
+                  <p className="font-medium text-gray-800 dark:text-white 500">75 kg</p>
                 </div>
                 <div className="text-center">
                   <span className="text-sm text-gray-500">Current</span>
@@ -87,7 +87,7 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-sm text-gray-500">Goal</span>
-                  <p className="font-medium text-gray-800">72 kg</p>
+                  <p className="font-medium text-gray-800 dark:text-white 500 ">72 kg</p>
                 </div>
               </div>
               <ProgressBar value={1.8} max={3} color="emerald" className="mb-1" />
@@ -96,34 +96,34 @@ const Profile: React.FC = () => {
               </p>
             </div>
             <div className="mb-6">
-              <h3 className="font-medium text-gray-800 mb-3">
+              <h3 className="font-medium text-gray-800 dark:text-white 500 mb-3">
                 Dietary Preferences
               </h3>
               <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-800">Diet Type</p>
-                    <p className="text-sm text-gray-600">Mostly vegetarian</p>
+                    <p className="font-medium text-gray-800 dark:text-white 500 ">Diet Type</p>
+                    <p className="text-sm text-gray-600 dark:text-white 500">Mostly vegetarian</p>
                   </div>
                   <Button size="sm" variant="ghost" icon={<EditIcon size={14} />}>
                     Edit
                   </Button>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-800">
+                    <p className="font-medium text-gray-800 dark:text-white 500">
                       Allergies & Restrictions
                     </p>
-                    <p className="text-sm text-gray-600">Lactose intolerance</p>
+                    <p className="text-sm text-gray-600 dark:text-white 500 ">Lactose intolerance</p>
                   </div>
                   <Button size="sm" variant="ghost" icon={<EditIcon size={14} />}>
                     Edit
                   </Button>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-800">Calorie Target</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-medium text-gray-800 dark:text-white 500 ">Calorie Target</p>
+                    <p className="text-sm text-gray-600 dark:text-white 500 ">
                       2,100 calories per day
                     </p>
                   </div>
@@ -134,7 +134,7 @@ const Profile: React.FC = () => {
               </div>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 mb-3">Weekly Summary</h3>
+              <h3 className="font-medium text-gray-800  dark:text-white 500 mb-3">Weekly Summary</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 bg-emerald-50 rounded-lg">
                   <div className="flex justify-between items-center mb-1">
@@ -175,7 +175,7 @@ const Profile: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-lg text-gray-800">
+              <h2 className="font-bold text-lg text-gray-800 dark:text-white 500">
                 Notification Preferences
               </h2>
               <BellIcon size={20} className="text-gray-400" />
@@ -183,7 +183,7 @@ const Profile: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div>
-                  <p className="font-medium text-gray-800">Daily Reminders</p>
+                  <p className="font-medium text-gray-800 dark:text-white 500">Daily Reminders</p>
                   <p className="text-sm text-gray-500">
                     Meal logging reminders
                   </p>
@@ -195,8 +195,8 @@ const Profile: React.FC = () => {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div>
-                  <p className="font-medium text-gray-800">Weekly Reports</p>
-                  <p className="text-sm text-gray-500">Progress summaries</p>
+                  <p className="font-medium text-gray-800 dark:text-white 500 ">Weekly Reports</p>
+                  <p className="text-sm text-gray-500 dark:text-white 500 ">Progress summaries</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" checked className="sr-only peer" />
@@ -205,7 +205,7 @@ const Profile: React.FC = () => {
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <div>
-                  <p className="font-medium text-gray-800">Challenge Updates</p>
+                  <p className="font-medium text-gray-800 dark:text-white 500 ">Challenge Updates</p>
                   <p className="text-sm text-gray-500">
                     New and completed challenges
                   </p>
@@ -217,7 +217,7 @@ const Profile: React.FC = () => {
               </div>
               <div className="flex justify-between items-center py-2">
                 <div>
-                  <p className="font-medium text-gray-800">AI Suggestions</p>
+                  <p className="font-medium text-gray-800 dark:text-white 500 ">AI Suggestions</p>
                   <p className="text-sm text-gray-500">
                     Personalized nutrition tips
                   </p>
@@ -230,7 +230,7 @@ const Profile: React.FC = () => {
             </div>
           </Card>
           <Card>
-            <h2 className="font-bold text-lg text-gray-800 mb-4">
+            <h2 className="font-bold text-lg text-gray-800 dark:text-white 500 mb-4">
               Account Settings
             </h2>
             <div className="space-y-2">

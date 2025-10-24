@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './components/ThemeContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
@@ -14,9 +15,11 @@ import Features from './pages/Features';
 import About from './pages/About';
 import Pricing from './pages/Pricing';
 import PaymentProcess from './pages/PaymentProcess';
+
 export function App() {
   return <Router>
-      <div className="w-full min-h-screen bg-gray-50">
+    <ThemeProvider>
+        <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -34,5 +37,6 @@ export function App() {
           <Route path="/payment-process" element={<PaymentProcess />} />
         </Routes>
       </div>
+      </ThemeProvider>
     </Router>;
 }

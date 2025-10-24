@@ -47,31 +47,31 @@ const Layout: React.FC<LayoutProps> = ({
   };
   const navItems = [{
     path: '/dashboard',
-    icon: <HomeIcon size={20} />,
+    icon: <HomeIcon size={25} />,
     label: 'Dashboard'
   }, {
     path: '/log-meal',
-    icon: <UtensilsIcon size={20} />,
+    icon: <UtensilsIcon size={25} />,
     label: 'Log Meal'
   }, {
     path: '/meal-plan',
-    icon: <CalendarIcon size={20} />,
+    icon: <CalendarIcon size={25} />,
     label: 'Meal Plan'
   }, {
     path: '/pantry',
-    icon: <ShoppingBagIcon size={20} />,
+    icon: <ShoppingBagIcon size={25} />,
     label: 'Pantry'
   }, {
     path: '/challenges',
-    icon: <TrophyIcon size={20} />,
+    icon: <TrophyIcon size={25} />,
     label: 'Challenges'
   }, {
     path: '/profile',
-    icon: <UserIcon size={20} />,
+    icon: <UserIcon size={25} />,
     label: 'Profile'
   }, {
     path: '/settings',
-    icon: <SettingsIcon size={20} />,
+    icon: <SettingsIcon size={25} />,
     label: 'Settings'
   }];
   if (hideNavigation) {

@@ -396,3 +396,397 @@
   background-color: rgb(254 243 199);
   color: rgb(146 64 14);
 }
+
+.enhanced-popup {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: 400px;
+  max-width: 90%;
+  animation: popupFade 0.25s ease-in-out;
+}
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.popup-field label {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.quantity-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-btn {
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+
+.grocery-add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  align-items: center;
+}
+
+.grocery-add-form input,
+.grocery-add-form select {
+  flex: 1 1 150px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+}
+
+.grocery-add-form button {
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.grocery-add-form button:hover {
+  background-color: #059669;
+}
+
+.pantry-table th,
+.pantry-table td {
+  text-align: center; /* Center content */
+  padding: 0.75rem 1rem;
+}
+
+.pantry-table th {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.pantry-table td {
+  background-color: #ffffff;
+  color: #111827;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pantry-table tr:hover td {
+  background-color: #f9fafb;
+}
+
+.pantry-actions-cell button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+  transition: transform 0.1s;
+}
+
+.pantry-actions-cell button:hover {
+  transform: scale(1.1);
+}
+
+.pantry-actions-cell button.decrease {
+  background-color: #f87171; /* red */
+  color: white;
+}
+
+.pantry-actions-cell button.increase {
+  background-color: #34d399; /* green */
+  color: white;
+}
+
+.distance-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.distance-close {
+  background-color: #16a34a;
+}
+
+.distance-medium {
+  background-color: #f59e0b;
+}
+
+.distance-far {
+  background-color: #ef4444;
+}
+
+.grocery-option {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+/* --- DARK MODE: PANTRY PAGE --- */
+
+.dark .pantry-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .pantry-subtitle {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .search-input {
+  background-color: #374151; /* gray-700 */
+  border-color: #4b5563; /* gray-600 */
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .search-input::placeholder {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .search-icon {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .tabs-container {
+  border-bottom-color: #374151; /* gray-700 */
+}
+
+.dark .tab-button:not(.active) {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .tab-button:not(.active):hover {
+  color: #f9fafb; /* gray-50 */
+}
+
+/* Make card background dark (assuming Card component handles dark bg, but title needs color) */
+/* --- Fix for Card Titles in Dark Mode --- */
+.dark .card h2 {
+  color: #f9fafb !important; /* Or simply 'white' */
+}
+
+.dark .grocery-add-form {
+  background-color: #374151; /* gray-700 */
+  border-color: #4b5563; /* gray-600 */
+}
+
+.dark .grocery-add-form input,
+.dark .grocery-add-form select {
+  background-color: #4b5563; /* gray-600 */
+  border-color: #6b7280; /* gray-500 */
+  color: #f9fafb; /* gray-50 */
+  color-scheme: dark; /* Helps with native select dropdown arrows */
+}
+
+.dark .pantry-table th {
+  background-color: #374151; /* gray-700 */
+  color: #d1d5db; /* gray-300 */
+}
+
+.dark .pantry-table td {
+  background-color: #1f2937; /* gray-800 - Explicitly set dark background */
+  color: #f9fafb; /* gray-50 */
+  border-bottom-color: #374151; /* gray-700 */
+}
+.dark .pantry-table tr:hover td {
+  background-color: #374151; /* gray-700 */
+}
+
+/* Grocery store list text */
+.dark .mt-8 p, /* Target the "Fetching..." and "Please enable..." text */
+.dark .text-gray-500 { /* Target the fallback text color */
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .grocery-option {
+  background: #374151; /* gray-700 */
+  border-color: #4b5563; /* gray-600 */
+}
+
+.dark .grocery-option-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .grocery-option-description {
+  color: #d1d5db; /* gray-300 */
+}
+
+/* Pantry table text */
+.dark .pantry-table-header-cell,
+.dark .pantry-table-cell {
+  color: #d1d5db; /* gray-300 */
+}
+
+.dark .pantry-table-row {
+  border-bottom-color: #374151; /* gray-700 */
+}
+
+.dark .pantry-table-row:hover {
+  background-color: #374151; /* gray-700 */
+}
+
+/* AI Suggestion Box */
+.dark .ai-suggestion {
+  background-color: #374151; /* gray-700 */
+}
+
+.dark .ai-avatar {
+  background-color: #4b5563; /* gray-600 */
+}
+
+.dark .ai-title,
+.dark .ai-message {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .ai-tip {
+  color: #9ca3af; /* gray-400 */
+}
+
+/* Recipe Cards */
+.dark .recipe-card {
+  border-color: #374151; /* gray-700 */
+  background-color: #1f2937; /* Add dark background for card */
+}
+
+/* Recipe header might need adjustment based on dynamic colors */
+.dark .recipe-header {
+  /* Keep light gradients for contrast or adjust */
+}
+.dark .recipe-icon-container {
+ /* Keep light gradients for contrast or adjust */
+}
+
+.dark .recipe-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .recipe-meta-item,
+.dark .recipe-description {
+  color: #9ca3af; /* gray-400 */
+}
+
+/* Recipe ingredients need dark mode adjustments based on dynamic colors */
+.dark .recipe-ingredient {
+  /* Example: Adjust based on color */
+  /* .dark .recipe-ingredient.bg-amber-50 { background-color: #451a03; color: #fef3c7; } */
+}
+
+/* Popup */
+.dark .enhanced-popup {
+  background: #1f2937; /* gray-800 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dark .popup-title {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .popup-field label {
+  color: #d1d5db; /* gray-300 */
+}
+
+.dark .popup-input,
+.dark .popup-field input,
+.dark .popup-field select {
+  background-color: #374151; /* gray-700 */
+  border-color: #4b5563; /* gray-600 */
+  color: #f9fafb; /* gray-50 */
+  color-scheme: dark;
+}
+
+/* Adjust button text/bg if needed in dark mode */
+.dark .pantry-actions-cell button {
+  /* Example: might need adjustment if using custom button styles */
+}
+
+.dark .grocery-add-form button {
+  /* Example: might need adjustment if using custom button styles */
+}
+/* --- Fix for Nearby Stores Text in Dark Mode --- */
+.dark .mt-8 h2, /* Targets "Nearby Grocery Stores" */
+.dark .mt-8 p { /* Targets "Fetching..." and "Please enable..." */
+  color: #f9fafb; /* Or simply 'white' */
+}
+
+/* If the "Please enable..." text still isn't white, try this more specific rule */
+.dark .text-gray-500.mt-3 {
+  color: #d1d5db !important; /* gray-300 with !important */
+}
+/* --- Fix for Recipe Suggestions Title --- */
+.dark .grocery-title.mb-4 { /* Targets the "Recipe Suggestions" h2 */
+  color: #f9fafb; /* Or simply 'white' */
+}
+
+/* 🌙 Make Grocery List text white in dark mode */
+.dark h2,
+.dark .grocery-add-form input,
+.dark .grocery-add-form select,
+.dark .grocery-add-form button,
+.dark .pantry-table th,
+.dark .pantry-table td,
+.dark .grocery-title,
+.dark .grocery-option,
+.dark .grocery-option-title,
+.dark .grocery-option-description {
+  color: #ffffff !important;
+}
+
+/* Optional: lighten table borders for dark mode too */
+.dark .pantry-table th,
+.dark .pantry-table td {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Keep Add button readable */
+.dark .grocery-add-form button {
+  background-color: #00d084; /* same green */
+  color: #000 !important; /* readable text on green */
+  border: none;
+}
+
+.dark .grocery-add-form button:hover {
+  background-color: #00ff99;
+}

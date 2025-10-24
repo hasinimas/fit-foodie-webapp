@@ -7,6 +7,11 @@
   flex-direction: column;
   margin-bottom: 1.5rem;
 }
+.nutrition-sum{
+  margin-right:3rem;
+  margin-left: -3rem;
+}
+
 @media (min-width: 768px) {
   .dashboard-header {
     flex-direction: row;
@@ -63,22 +68,28 @@
   display: flex;
   align-items: center;
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: 0.8rem;
   margin-bottom: 1rem;
 }
+
+.stat-card:hover{
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
 @media (min-width: 768px) {
   .stat-card {
     margin-bottom: 0;
   }
 }
 .stat-card-primary {
-  background-color: rgb(236 253 245);
+  background-color:  rgb(254 243 199);
 }
 .stat-card-secondary {
-  background-color: rgb(219 234 254);
+  background-color: rgb(243, 226, 251);
 }
 .stat-card-tertiary {
-  background-color: rgb(254 243 199);
+  background-color: rgb(198, 243, 253);
 }
 .stat-icon-container {
   height: 3rem;
@@ -91,16 +102,25 @@
   flex-shrink: 0;
 }
 .stat-icon-primary {
-  background-color: rgb(209 250 229);
-}
-.stat-icon-secondary {
-  background-color: rgb(191 219 254);
-}
-.stat-icon-tertiary {
   background-color: rgb(253 230 138);
 }
+.stat-card-primary svg {
+  color: #ffaf02; /* warm amber tone for calories */
+}
+.stat-icon-secondary {
+  background-color: rgb(220, 171, 255);
+}
+.stat-card-secondary svg {
+  color: #9333ea; /* purple tone for steps */
+}
+.stat-icon-tertiary {
+  background-color: rgb(137, 220, 248);
+}
+.stat-card-tertiary svg {
+  color: #0284c7; /* blue tone for water */
+}
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: rgb(107 114 128);
 }
 .stat-value {
@@ -109,14 +129,20 @@
   color: rgb(31 41 55);
 }
 .tip-box {
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: rgb(219 234 254);
-  border-radius: 0.5rem;
-  border-left: 4px solid rgb(59 130 246);
-  margin-bottom: 1rem;
+  border-radius: 1rem;
+  border-left: 10px solid rgb(59 130 246);
+  margin-bottom: 3rem;
 }
+.tip-box:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  background-color: #e0f2fe;
+}
+
 .tip-text {
-  font-size: 0.875rem;
+  font-size: 0.995rem;
   color: rgb(30 58 138);
 }
 .macro-grid {
@@ -132,10 +158,18 @@
 .macro-card {
   padding: 1rem;
   border: 1px solid rgb(229 231 235);
-  border-radius: 0.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
+
+.macro-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  background-color: #f2ffff;
+}
+
 .macro-label {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: rgb(107 114 128);
   margin-bottom: 0.25rem;
 }
@@ -161,23 +195,31 @@
   justify-content: space-between;
   width: 100%;
   padding: 0.75rem;
-  background-color: rgb(249 250 251);
+  background-color: rgb(230, 232, 232);
   border-radius: 0.5rem;
   transition: all 0.2s;
 }
 .action-button:hover {
-  background-color: rgb(243 244 246);
+  transform: translateY(-4px) scale(1.02);
+  background: linear-gradient(135deg, #f8fafc, #bdedf5);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 .action-icon-container {
-  height: 2rem;
-  width: 2rem;
+  height: 3rem;
+  width: 3rem;
   background-color: rgb(243 244 246);
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.75rem;
+  margin-right: 1rem;
 }
+
+.action-icon-container svg {
+  width: 1.5rem;  /* icon size inside */
+  height: 1.5rem;
+}
+
 .action-label {
   font-weight: 500;
 }
@@ -250,3 +292,78 @@
   color: rgb(107 114 128);
   font-size: 0.875rem;
 }
+
+
+
+
+.nav-button .label {
+  font-size: 1rem;
+}
+/* --- DARK MODE: DASHBOARD CONTENT --- */
+
+.dark .dashboard-title,
+.dark .nutrition-card-title,
+.dark .quick-actions-title,
+.dark .macro-value,
+.dark .stat-value,
+.dark .table-cell {
+  color: rgb(243 244 246);
+}
+
+.dark .dashboard-subtitle,
+.dark .stat-label,
+.dark .macro-label,
+.dark .action-arrow,
+.dark .table-header-cell,
+.dark .table-empty {
+  color: rgb(156 163 175);
+}
+
+.dark .stat-card-primary {
+  background-color: #422006;
+}
+.dark .stat-card-secondary {
+  background-color: #2e1045;
+}
+.dark .stat-card-tertiary {
+  background-color: #0c243f;
+}
+
+.dark .tip-box {
+  background-color: rgb(30 41 55);
+  border-left-color: rgb(37 99 235);
+}
+
+.dark .tip-box:hover {
+  background-color: rgb(55 65 81);
+}
+
+.dark .tip-text {
+  color: rgb(219 234 254);
+}
+
+.dark .macro-card {
+  border-color: rgb(55 65 81);
+  box-shadow: none;
+}
+
+.dark .macro-card:hover {
+  background-color: rgb(31 41 55);
+}
+
+.dark .action-button {
+  background-color: rgb(55 65 81);
+}
+
+.dark .action-button:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+}
+
+.dark .action-icon-container {
+  background-color: rgb(75 85 99);
+}
+
+.dark .action-label {
+  color: rgb(249 250 251);
+}
+

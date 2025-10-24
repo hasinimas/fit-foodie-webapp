@@ -3,6 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Button from '../components/Button';
 import { MailIcon, LockIcon, UserIcon, CalendarIcon, CakeIcon, HeartIcon, AlertCircleIcon, EyeIcon, EyeOffIcon, CheckCircleIcon } from 'lucide-react';
+import { auth, db } from "../firebaseConfig";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+
+
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -57,7 +62,7 @@ const Login: React.FC = () => {
   const handlePrevStep = () => {
     setCurrentStep(prev => prev - 1);
   };
-  const handleSubmit = (e: React.FormEvent) => {
+ {/* const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isLogin) {
       navigate('/dashboard');
@@ -68,7 +73,50 @@ const Login: React.FC = () => {
         navigate('/onboarding');
       }
     }
-  };
+  };*/}
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (isLogin) {
+    // 🔐 Login existing user
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      navigate("/dashboard");
+    } catch (error: any) {
+      alert("Login failed: " + error.message);
+    }
+  } else {
+    // 🆕 Register new user
+    if (currentStep < 3) {
+      handleNextStep();
+      return;
+    }
+
+    try {
+      // Create account in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      // Save user profile in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        age: formData.age,
+        gender: formData.gender,
+        dietPreference: formData.dietPreference,
+        allergies: formData.allergies,
+        createdAt: new Date().toISOString(),
+      });
+
+      alert("Account created successfully!");
+      navigate("/onboarding");
+    } catch (error: any) {
+      alert("Registration failed: " + error.message);
+    }
+  }
+};
+
   const dietaryPreferences = ['No Restrictions', 'Vegetarian', 'Vegan', 'Pescatarian', 'Keto', 'Paleo', 'Low Carb', 'Mediterranean', 'Gluten-Free'];
   const commonAllergies = ['Dairy', 'Eggs', 'Peanuts', 'Tree nuts', 'Soy', 'Wheat/Gluten', 'Fish', 'Shellfish'];
   const togglePasswordVisibility = () => {

@@ -2,26 +2,32 @@ import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import { useTheme } from '../components/ThemeContext';
+
 import { ChevronLeftIcon, MoonIcon, SunIcon, GlobeIcon, BellIcon, ShieldIcon, TrashIcon, SaveIcon, CheckIcon } from 'lucide-react';
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
-  const [theme, setTheme] = useState('light');
   const [language, setLanguage] = useState('english');
+  const { theme, setTheme } = useTheme()
   return <Layout>
       <div className="max-w-4xl mx-auto">
-        <button onClick={() => history.back()} className="flex items-center text-gray-600 hover:text-gray-800 mb-6">
+        <button onClick={() => history.back()}
+
+        className="flex items-center text-gray-600 dark:text-gray-300  hover:text-gray-800dark:hover:text-gray-100 mb-6">
+
           <ChevronLeftIcon size={20} />
           <span className="ml-1">Back</span>
         </button>
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Settings</h1>
+        
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 dark:text-white 500 mb-6">Settings</h1>
+        
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-full md:w-1/4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100">
-                <h2 className="font-medium text-gray-800">Settings</h2>
+ <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">              <div className="p-4 border-b border-gray-100">
+                <h2 className="font-medium text-gray-800 dark:text-white 500 ">Settings</h2>
               </div>
               <div className="p-2">
-                <button className={`w-full text-left px-4 py-2 rounded-lg text-sm ${activeTab === 'general' ? 'bg-emerald-50 text-emerald-600 font-medium' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('general')}>
+                <button className={`w-full text-left px-4 py-2 rounded-lg text-sm ${activeTab === 'general' ? 'bg-emerald-50 text-emerald-600 font-medium' : 'text-gray-600 hover:bg-gray-100 '}`} onClick={() => setActiveTab('general')}>
                   General
                 </button>
                 <button className={`w-full text-left px-4 py-2 rounded-lg text-sm ${activeTab === 'notifications' ? 'bg-emerald-50 text-emerald-600 font-medium' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('notifications')}>
@@ -38,26 +44,27 @@ const Settings: React.FC = () => {
           </div>
           <div className="w-full md:w-3/4">
             {activeTab === 'general' && <Card>
-                <h2 className="font-bold text-lg text-gray-800 mb-6">
-                  General Settings
-                </h2>
+               <h2 className="font-bold text-lg text-gray-800 dark:text-white dark:text-white 500 mb-6">
+  General Settings
+</h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
-                      Appearance
-                    </h3>
+                    <h3 className="font-medium text-gray-800 dark:text-gray-300 mb-3">
+  Appearance
+</h3>
                     <div className="flex space-x-2">
+                     
                       <button onClick={() => setTheme('light')} className={`flex-1 p-3 border rounded-lg flex flex-col items-center ${theme === 'light' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'}`}>
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center mb-2 ${theme === 'light' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                          <SunIcon size={20} className={theme === 'light' ? 'text-emerald-500' : 'text-gray-400'} />
+                          <SunIcon size={20} className={theme === 'light' ? 'text-emerald-500' : 'text-gray-400'  } />
                         </div>
-                        <span className="text-sm font-medium">Light</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-white">Light</span>
                       </button>
                       <button onClick={() => setTheme('dark')} className={`flex-1 p-3 border rounded-lg flex flex-col items-center ${theme === 'dark' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'}`}>
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center mb-2 ${theme === 'dark' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
                           <MoonIcon size={20} className={theme === 'dark' ? 'text-emerald-500' : 'text-gray-400'} />
                         </div>
-                        <span className="text-sm font-medium">Dark</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray" >Dark</span>
                       </button>
                       <button onClick={() => setTheme('system')} className={`flex-1 p-3 border rounded-lg flex flex-col items-center ${theme === 'system' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'}`}>
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center mb-2 ${theme === 'system' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
@@ -65,12 +72,12 @@ const Settings: React.FC = () => {
                             <div className="absolute top-0 right-0 w-3 h-3 bg-white rounded-full" />
                           </div>
                         </div>
-                        <span className="text-sm font-medium">System</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray">System</span>
                       </button>
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">Language</h3>
+                    <h3 className="font-medium text-gray-800 dark:text-white 500 mb-3">Language</h3>
                     <div className="flex items-center space-x-3 mb-2">
                       <GlobeIcon size={20} className="text-gray-400" />
                       <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
@@ -80,17 +87,17 @@ const Settings: React.FC = () => {
                         <option value="hindi">Hindi</option>
                       </select>
                     </div>
-                    <p className="text-sm text-gray-500">
-                      This will change the language throughout the app
-                    </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+  This will change the language throughout the app
+</p>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
+                    <h3 className="font-medium text-gray-800 dark:text-white 500 mb-3">
                       Units of Measurement
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Weight</span>
+                        <span className="text-sm text-gray-600 dark:text-white 500 ">Weight</span>
                         <div className="flex">
                           <button className="px-3 py-1 bg-emerald-500 text-white rounded-l-md text-sm">
                             kg
@@ -101,7 +108,7 @@ const Settings: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Volume</span>
+                        <span className="text-sm text-gray-600 dark:text-white 500">Volume</span>
                         <div className="flex">
                           <button className="px-3 py-1 bg-emerald-500 text-white rounded-l-md text-sm">
                             ml
@@ -112,7 +119,7 @@ const Settings: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Energy</span>
+                        <span className="text-sm text-gray-600 dark:text-white 500 ">Energy</span>
                         <div className="flex">
                           <button className="px-3 py-1 bg-emerald-500 text-white rounded-l-md text-sm">
                             kcal
@@ -131,23 +138,25 @@ const Settings: React.FC = () => {
               </Card>}
             {activeTab === 'notifications' && <Card>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-bold text-lg text-gray-800">
+                  
+                  <h2 className="font-bold text-lg text-gray-800 dark:text-white ">
+
                     Notification Settings
                   </h2>
-                  <BellIcon size={20} className="text-gray-400" />
+                  <BellIcon size={20} className="text-gray-400 dark:text-white" />
                 </div>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
+                    <h3 className="font-medium text-gray-800 dark:text-white mb-3">
                       Notification Methods
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white ">
                             Email
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-white ">
                             ravi.kumar@example.com
                           </p>
                         </div>
@@ -158,10 +167,10 @@ const Settings: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white ">
                             In-App
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-white ">
                             Push notifications in the app
                           </p>
                         </div>
@@ -173,13 +182,13 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
+                    <h3 className="font-medium text-gray-800 dark:text-white mb-3">
                       Notification Types
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white">
                             Meal Reminders
                           </p>
                           <p className="text-xs text-gray-500">
@@ -193,7 +202,7 @@ const Settings: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white">
                             Weekly Reports
                           </p>
                           <p className="text-xs text-gray-500">
@@ -207,7 +216,7 @@ const Settings: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white ">
                             Challenge Updates
                           </p>
                           <p className="text-xs text-gray-500">
@@ -221,7 +230,7 @@ const Settings: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center py-2">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white ">
                             AI Insights
                           </p>
                           <p className="text-xs text-gray-500">
@@ -242,20 +251,20 @@ const Settings: React.FC = () => {
               </Card>}
             {activeTab === 'privacy' && <Card>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-bold text-lg text-gray-800">
+                  <h2 className="font-bold text-lg text-gray-800 dark:text-white ">
                     Privacy & Security
                   </h2>
                   <ShieldIcon size={20} className="text-gray-400" />
                 </div>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
+                    <h3 className="font-medium text-gray-800 dark:text-white  mb-3">
                       Data Usage
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white ">
                             Share Usage Data
                           </p>
                           <p className="text-xs text-gray-500">
@@ -269,7 +278,7 @@ const Settings: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white ">
                             Personalized AI
                           </p>
                           <p className="text-xs text-gray-500">
@@ -284,7 +293,7 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">Security</h3>
+                    <h3 className="font-medium text-gray-800 dark:text-white mb-3">Security</h3>
                     <div className="space-y-4">
                       <button className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
                         <div className="text-left">
@@ -324,7 +333,7 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
+                    <h3 className="font-medium text-gray-800 dark:text-white mb-3">
                       Data Management
                     </h3>
                     <div className="space-y-4">
@@ -358,35 +367,35 @@ const Settings: React.FC = () => {
                 </div>
               </Card>}
             {activeTab === 'account' && <Card>
-                <h2 className="font-bold text-lg text-gray-800 mb-6">
+                <h2 className="font-bold text-lg text-gray-800  dark:text-white mb-6">
                   Account Settings
                 </h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-medium text-gray-800 mb-3">
+                    <h3 className="font-medium text-gray-800 dark:text-white mb-3">
                       Personal Information
                     </h3>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                           Full Name
                         </label>
                         <input type="text" defaultValue="Ravi Kumar" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700  dark:text-white mb-1">
                           Email Address
                         </label>
                         <input type="email" defaultValue="ravi.kumar@example.com" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                           Phone Number (optional)
                         </label>
                         <input type="tel" placeholder="+94 123 456 789" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                           Location
                         </label>
                         <input type="text" defaultValue="Kandy, Sri Lanka" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
