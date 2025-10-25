@@ -1,5 +1,4 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -18,7 +17,10 @@ import PaymentProcess from './pages/PaymentProcess';
 import PaymentSuccess from './pages/PaymentSuccess';
 
 export function App() {
-  return <Router>
+  return <Router future={{ 
+    v7_startTransition: true,
+    v7_relativeSplatPath: true 
+  }}>
     <ThemeProvider>
         <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
         <Routes>

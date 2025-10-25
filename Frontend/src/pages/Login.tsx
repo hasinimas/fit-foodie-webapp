@@ -106,6 +106,7 @@ const Login: React.FC = () => {
         gender: formData.gender,
         dietPreference: formData.dietPreference,
         allergies: formData.allergies,
+        plan: "free", // Default plan for new users
         createdAt: new Date().toISOString(),
       });
 
