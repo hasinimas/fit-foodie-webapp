@@ -15,6 +15,7 @@ import Features from './pages/Features';
 import About from './pages/About';
 import Pricing from './pages/Pricing';
 import PaymentProcess from './pages/PaymentProcess';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 export function App() {
   return <Router>
@@ -35,6 +36,7 @@ export function App() {
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/payment-process" element={<PaymentProcess />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>
       </div>
       </ThemeProvider>

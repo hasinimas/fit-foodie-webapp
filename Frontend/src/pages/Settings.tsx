@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { useTheme } from '../components/ThemeContext';
+import UpgradeToPremium from '../components/UpgradeToPremium';
 
 import { ChevronLeftIcon, MoonIcon, SunIcon, GlobeIcon, BellIcon, ShieldIcon, TrashIcon, SaveIcon, CheckIcon } from 'lucide-react';
 const Settings: React.FC = () => {
@@ -418,9 +419,7 @@ const Settings: React.FC = () => {
                             features. Upgrade to Premium for advanced AI
                             features and unlimited meal planning.
                           </p>
-                          <Button size="sm" className="mt-3">
-                            Upgrade to Premium
-                          </Button>
+                          <UpgradeToPremium />
                         </div>
                       </div>
                     </div>

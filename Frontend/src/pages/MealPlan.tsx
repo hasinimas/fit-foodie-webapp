@@ -120,22 +120,37 @@ const MealPlan: React.FC = () => {
 
         // If user navigated with a freshly generated plan, use it and save to Firestore
         if (navState?.plan?.days && Array.isArray(navState.plan.days) && navState.plan.days.length) {
-          setPlan(navState.plan.days);
-          setActiveDay(0);
-          await setDoc(planDocRef, { days: navState.plan.days });
+          const days = navState.plan.days;
+          setPlan(days);
+
+          // only reset activeDay if current index is invalid (or first mount)
+          setActiveDay((cur) => {
+            if (typeof cur !== "number") return 0;
+            if (cur < 0 || cur >= days.length) return 0;
+            return cur;
+          });
+
+          await setDoc(planDocRef, { days });
           setLoading(false);
           return;
         }
+
 
         // Otherwise, attempt to load the last saved plan from Firestore
         const snap = await getDoc(planDocRef);
         if (snap.exists()) {
           const saved = snap.data();
           if (saved?.days && Array.isArray(saved.days)) {
-            setPlan(saved.days);
-            setActiveDay(0);
+            const days = saved.days;
+            setPlan(days);
+            setActiveDay((cur) => {
+              if (typeof cur !== "number") return 0;
+              if (cur < 0 || cur >= days.length) return 0;
+              return cur;
+            });
           }
         }
+
       } catch (err) {
         console.error("Error loading/saving meal plan:", err);
       } finally {
@@ -195,7 +210,11 @@ const MealPlan: React.FC = () => {
       }
 
       setPlan(days);
-      setActiveDay(0);
+      setActiveDay((cur) => {
+        if (typeof cur !== "number") return 0;
+        if (cur < 0 || cur >= days.length) return 0;
+        return cur;
+      });
       await setDoc(doc(db, "users", uid, "mealData", "mealPlan"), { days });
 
       Swal.fire({
