@@ -71,7 +71,7 @@ const Home: React.FC = () => {
                 Smart Meal Tracking
               </h3>
               <p className="text-gray-600">
-                Log meals with text, voice, or photos. Our AI instantly
+                Log meals with text or voice, Our AI instantly
                 calculates nutritional values and provides feedback.
               </p>
             </div>
@@ -97,7 +97,7 @@ const Home: React.FC = () => {
                 Smart Pantry
               </h3>
               <p className="text-gray-600">
-                Track groceries, get shopping suggestions, and find recipes
+                Track groceries, nearby grocery stores, and find recipes
                 based on what you already have.
               </p>
             </div>
