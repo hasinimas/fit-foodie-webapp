@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
-import { UtensilsIcon, BrainIcon, ShoppingBagIcon, TrophyIcon, BarChartIcon, CalendarIcon, MessageCircleIcon, ActivityIcon, UserIcon, HeartIcon, LockIcon, ZapIcon, CheckIcon, ArrowRightIcon } from 'lucide-react';
+import { UtensilsIcon, BrainIcon, ShoppingBagIcon, TrophyIcon, BarChartIcon, CalendarIcon, MessageCircleIcon, ActivityIcon, UserIcon, HeartIcon, LockIcon, ZapIcon, CheckIcon, ArrowRightIcon, Mic } from 'lucide-react';
 const Features: React.FC = () => {
   return <div className="min-h-screen bg-white">
       <Navbar />
@@ -45,7 +45,7 @@ const Features: React.FC = () => {
                 Smart Meal Tracking
               </h3>
               <p className="text-gray-600 mb-4">
-                Log meals with text, voice, or photos. Our AI instantly
+                Log meals with text or voice, . Our AI instantly
                 calculates nutritional values and provides feedback.
               </p>
               <ul className="space-y-2">
@@ -234,61 +234,53 @@ const Features: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex">
               <div className="h-12 w-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                <MessageCircleIcon size={24} className="text-indigo-600" />
+                <Mic size={24} className="text-indigo-600" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Nutrition Chat Assistant
+                  Voice Meal Log
                 </h3>
                 <p className="text-gray-600">
-                  Ask questions about nutrition, get recipe ideas, or receive
-                  guidance on making healthier food choices. Our AI assistant is
-                  available 24/7 to help you on your journey.
+                 Log your meals effortlessly using voice commands. Speak naturally to record what you’ve eaten, and the system instantly analyses nutritional data through AI — no typing required. This feature saves time and makes daily tracking seamless and hands-free.
                 </p>
               </div>
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex">
               <div className="h-12 w-12 bg-pink-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                <ActivityIcon size={24} className="text-pink-600" />
+                <CalendarIcon size={24} className="text-pink-600" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Fitness Integration
+                  Weekly Meal Planning
                 </h3>
                 <p className="text-gray-600">
-                  Connect with popular fitness apps and wearables to sync your
-                  activity data, providing a complete picture of your calorie
-                  intake and expenditure.
+                  Receive AI-generated weekly meal plans tailored to your goals, preferences, and dietary habits. Users can view daily meal schedules, substitute ingredients, and download personalized plans to stay organized and consistent with their nutrition goals.
                 </p>
               </div>
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex">
               <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                <UserIcon size={24} className="text-orange-600" />
+                <BarChartIcon size={24} className="text-orange-600" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Nutritionist Access
+                  Advanced Analytics
                 </h3>
                 <p className="text-gray-600">
-                  Premium members can schedule virtual consultations with
-                  registered nutritionists for personalized advice and custom
-                  meal planning.
+                 Unlock deeper insights into your eating patterns with detailed nutrition analytics. Visual charts and progress summaries display calorie intake, macronutrient distribution, and goal achievements. This data helps users make informed adjustments for better health outcomes.
                 </p>
               </div>
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex">
               <div className="h-12 w-12 bg-teal-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                <HeartIcon size={24} className="text-teal-600" />
+                <TrophyIcon size={24} className="text-teal-600" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Health Metrics
+                  Challenges
                 </h3>
                 <p className="text-gray-600">
-                  Track additional health metrics like blood pressure, glucose
-                  levels, and sleep quality to see how your nutrition impacts
-                  your overall health.
+                  Stay motivated through gamified wellness challenges. Earn points, badges, and rankings by completing daily or weekly goals such as logging meals or maintaining balanced nutrition. This feature turns healthy habits into fun, achievable milestones
                 </p>
               </div>
             </div>
