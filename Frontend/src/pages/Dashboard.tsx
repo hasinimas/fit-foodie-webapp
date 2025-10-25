@@ -8,7 +8,7 @@ import ProgressBar from '../components/ProgressBar';
 import MoodTracker from '../components/MoodTracker';
 import {
   UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon,
-  HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon
+  HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon, StarIcon 
 } from 'lucide-react';
 // @ts-ignore
 import { auth, db } from '../firebaseConfig';
@@ -83,6 +83,33 @@ const Dashboard: React.FC = () => {
 
   // NEW: daily summaries state (minimal change)
   const [dailySummaries, setDailySummaries] = useState<any[]>([]);
+ 
+  // NEW: weekly totals state
+    const [weeklyTotals, setWeeklyTotals] = useState({
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fats: 0,
+    });
+
+    const [userPoints, setUserPoints] = useState<number | null>(null);
+
+useEffect(() => {
+  const fetchUserPoints = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const profileRef = doc(db, "users", user.uid);
+    const snap = await getDoc(profileRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      setUserPoints(data.points || 0);
+    } else {
+      setUserPoints(0);
+    }
+  };
+  fetchUserPoints();
+}, []);
+
 
   // Fetch meal history from Firebase (unchanged)
   useEffect(() => {
@@ -136,6 +163,25 @@ const Dashboard: React.FC = () => {
     };
     fetchDailySummaries();
   }, []);
+
+  // Compute weekly totals whenever dailySummaries change
+    useEffect(() => {
+      const last7Days = dailySummaries.slice(0, 7); // already sorted newest first
+      if (last7Days.length > 0) {
+        const totals = last7Days.reduce(
+          (acc, day) => {
+            const t = day.totals || {};
+            acc.calories += t.calories || 0;
+            acc.protein += t.protein || 0;
+            acc.carbs += t.carbs || 0;
+            acc.fats += t.fats || 0;
+            return acc;
+          },
+          { calories: 0, protein: 0, carbs: 0, fats: 0 }
+        );
+        setWeeklyTotals(totals);
+      }
+    }, [dailySummaries]);
 
   // Fetch user data from Firebase and merge with defaults
   useEffect(() => {
@@ -289,75 +335,91 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Nutrition & Quick Actions */}
-        <div className="dashboard-grid">
-          <div className="nutrition-sum">
+        {/* Nutrition Summary - Weekly Totals */}
+          <div className="dashboard-grid">
             <Card className="col-span-1 md:col-span-1">
-              <h2 className="nutrition-card-title">Today's Nutrition</h2>
+              <h2 className="nutrition-card-title">Weekly Nutrition Totals</h2>
               <div className="nutrition-stats">
                 <div className="stat-card stat-card-primary">
-                  <div className="stat-icon-container stat-icon-primary">{goalContent.primaryIcon}</div>
+                  <div className="stat-icon-container stat-icon-primary">
+                    <ActivityIcon size={28} className="text-emerald-500" />
+                  </div>
                   <div>
-                    <p className="stat-label">{goalContent.primaryMetric}</p>
-                    <p className="stat-value">{userData.progress.calories} / {userData.dailyCalories}</p>
+                    <p className="stat-label">Calories</p>
+                    <p className="stat-value">{weeklyTotals.calories} kcal</p>
                   </div>
                 </div>
                 <div className="stat-card stat-card-secondary">
-                  <div className="stat-icon-container stat-icon-secondary">{goalContent.secondaryIcon}</div>
+                  <div className="stat-icon-container stat-icon-secondary">
+                    <ActivityIcon size={28} className="text-blue-500" />
+                  </div>
                   <div>
-                    <p className="stat-label">{goalContent.secondaryMetric}</p>
-                    <p className="stat-value">{goalContent.secondaryValue}</p>
+                    <p className="stat-label">Protein</p>
+                    <p className="stat-value">{weeklyTotals.protein} g</p>
                   </div>
                 </div>
                 <div className="stat-card stat-card-tertiary">
-                  <div className="stat-icon-container stat-icon-tertiary"><DropletIcon size={24} className="text-amber-500" /></div>
+                  <div className="stat-icon-container stat-icon-tertiary">
+                    <ActivityIcon size={28} className="text-amber-500" />
+                  </div>
                   <div>
-                    <p className="stat-label">Water</p>
-                    <p className="stat-value">{userData.progress.water}L / {userData.dailyWater}L</p>
+                    <p className="stat-label">Carbs</p>
+                    <p className="stat-value">{weeklyTotals.carbs} g</p>
                   </div>
                 </div>
+                <div className="stat-card stat-card-quaternary p-3 bg-pink-50 rounded-lg flex items-center gap-3">
+              <div className="stat-icon-container stat-icon-quaternary bg-pink-100 p-2 rounded-full">
+                <ActivityIcon size={28} className="text-pink-500" />
               </div>
+              <div>
+                <p className="stat-label text-pink-600 font-medium">Fats</p>
+                <p className="stat-value text-pink-700 font-semibold">{weeklyTotals.fats} g</p>
+              </div>
+            </div>
+              </div>
+              {/* User Points Card */}
+              <Card className="col-span-1 md:col-span-1">
+                <h2 className="quick-actions-title">Your Points</h2>
+                <div className="flex items-center justify-between mt-3 p-4 bg-yellow-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <StarIcon size={28} className="text-yellow-500" />
+                    <div>
+                      <p className="stat-label font-medium text-yellow-700">Total Points</p>
+                    <p className="stat-value text-lg font-bold text-yellow-800">
+                      {userPoints !== null ? `${userPoints} pts` : "Loading..."}
+                    </p>
+                   </div>
+                    </div>
+                    <Button
+                      onClick={() => navigate("/challenges")}
+                      className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium border border-yellow-300 transition-all"
+                    >
+                      Go to Challenges
+                    </Button>
 
-              {/* Tip */}
-              <div className="tip-box"><p className="tip-text"><span className="font-medium">Tip:</span> {goalContent.tip}</p></div>
 
-              {/* Macros */}
-              <div className="macro-grid">
-                <div className="macro-card">
-                  <p className="macro-label">Carbs</p>
-                  <p className="macro-value">{userData.progress.carbs}g / 260g</p>
-                  <ProgressBar value={userData.progress.carbs} max={260} color="blue" size="md" className="mt-2" />
-                </div>
-                <div className="macro-card">
-                  <p className="macro-label">Protein</p>
-                  <p className="macro-value">{userData.progress.protein}g / {userData.dailyProtein}g</p>
-                  <ProgressBar value={userData.progress.protein} max={userData.dailyProtein} color="emerald" size="md" className="mt-2" />
-                </div>
-                <div className="macro-card">
-                  <p className="macro-label">Fats</p>
-                  <p className="macro-value">{userData.progress.fats}g / 70g</p>
-                  <ProgressBar value={userData.progress.fats} max={70} color="amber" size="md" className="mt-2" />
-                </div>
+                  </div>
+                </Card>
+
+            </Card>
+
+
+            {/* Quick Actions */}
+            <Card>
+              <h2 className="quick-actions-title">Quick Actions</h2>
+              <div className="action-list">
+                {goalContent.quickActions.map((action, index) => (
+                  <button key={index} onClick={() => navigate(action.path)} className="action-button">
+                    <div className="flex items-center">
+                      <div className="action-icon-container">{action.icon}</div>
+                      <span className="action-label">{action.label}</span>
+                    </div>
+                    <ChevronRightIcon size={16} className="action-arrow" />
+                  </button>
+                ))}
               </div>
             </Card>
           </div>
-
-          {/* Quick Actions */}
-          <Card>
-            <h2 className="quick-actions-title">Quick Actions</h2>
-            <div className="action-list">
-              {goalContent.quickActions.map((action, index) => (
-                <button key={index} onClick={() => navigate(action.path)} className="action-button">
-                  <div className="flex items-center">
-                    <div className="action-icon-container">{action.icon}</div>
-                    <span className="action-label">{action.label}</span>
-                  </div>
-                  <ChevronRightIcon size={16} className="action-arrow" />
-                </button>
-              ))}
-            </div>
-          </Card>
-        </div>
 
         {/* Mood Tracker & Progress */}
         <div className="dashboard-grid">
