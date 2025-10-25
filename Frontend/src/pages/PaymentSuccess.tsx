@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // @ts-ignore - firebaseConfig is a .js file
 import { db, auth } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import Layout from '../components/Layout';
 import { CheckCircleIcon, XCircleIcon } from 'lucide-react';
 
@@ -13,65 +14,76 @@ const PaymentSuccess: React.FC = () => {
   const [message, setMessage] = useState('Processing your payment...');
 
   useEffect(() => {
-    const savePaymentData = async () => {
+    // Payment confirmation and update user plan to premium
+    const confirmPayment = async () => {
       try {
-        console.log('Starting payment data save...');
+        console.log('Payment confirmation received');
         
-        // Get current user info
-        const currentUser = auth.currentUser;
-        console.log('Current user:', currentUser);
-        
-        const userId = currentUser?.uid || 'anonymous';
-        const userEmail = currentUser?.email || 'no-email';
-        const userName = currentUser?.displayName || 'Unknown User';
+        // Wait for Firebase Auth to initialize and get current user
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+          if (!currentUser) {
+            console.log('No user logged in');
+            setStatus('error');
+            setMessage('User not logged in. Please log in and try again.');
+            return;
+          }
+          
+          try {
+            // Get Stripe session ID from URL params (if available)
+            const sessionId = searchParams.get('session_id') || searchParams.get('payment_intent') || null;
+            console.log('Session ID from URL:', sessionId);
+            console.log('Updating plan for user:', currentUser.uid);
+            
+            // Calculate expiry date (30 days from now)
+            const expireDate = Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+            
+            // Generate subscription ID
+            const subscriptionId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Update user's plan to "premium" in Firebase with subscription details
+            const userDocRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userDocRef, {
+              plan: 'premium',
+              subscription: {
+                subscriptionId: subscriptionId,
+                upgradedAt: serverTimestamp(), // Real server time
+                expiresAt: expireDate, // 30 days from now
+                stripeSessionId: sessionId || 'N/A',
+                status: 'active'
+              }
+            });
+            
+            console.log('User plan updated to premium successfully');
+            console.log('Subscription details:', {
+              subscriptionId,
+              expiresIn: '30 days'
+            });
+            
+            setStatus('success');
+            setMessage('Payment successful! Your premium account is now active.');
+            
+            // Redirect to dashboard after 3 seconds
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 3000);
+          } catch (error) {
+            console.error('Error processing payment confirmation:', error);
+            setStatus('error');
+            setMessage(`There was an error activating your premium account: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          }
+        });
 
-        // Get Stripe session ID from URL params (if available)
-        const sessionId = searchParams.get('session_id') || searchParams.get('payment_intent') || null;
-        console.log('Session ID from URL:', sessionId);
-        
-        // Generate a unique transaction ID
-        const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-        // Save payment data to Firestore
-        const paymentData = {
-          userId: userId,
-          email: userEmail,
-          userName: userName,
-          planType: 'premium',
-          price: 9.99,
-          currency: 'USD',
-          status: 'completed',
-          method: 'stripe',
-          stripe_link: 'https://buy.stripe.com/test_00w00j5NigcC9wx0eP4Ni00',
-          transactionId: transactionId,
-          paymentId: sessionId,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-
-        console.log('Payment data to save:', paymentData);
-        console.log('Firestore db object:', db);
-        
-        const docRef = await addDoc(collection(db, 'payments'), paymentData);
-        console.log('Payment saved successfully! Document ID:', docRef.id);
-        
-        setStatus('success');
-        setMessage('Payment successful! Your premium account is now active.');
-        
-        // Redirect to dashboard after 3 seconds
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 3000);
+        // Cleanup subscription
+        return () => unsubscribe();
         
       } catch (error) {
-        console.error('Error saving payment data:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
+        console.error('Error processing payment confirmation:', error);
         setStatus('error');
-        setMessage(`Payment was successful but there was an error saving your data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setMessage(`There was an error activating your premium account: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
 
-    savePaymentData();
+    confirmPayment();
   }, [searchParams, navigate]);
 
   return (

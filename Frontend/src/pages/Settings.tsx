@@ -1,15 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { useTheme } from '../components/ThemeContext';
 import UpgradeToPremium from '../components/UpgradeToPremium';
+// @ts-ignore - firebaseConfig is a .js file
+import { db, auth } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 import { ChevronLeftIcon, MoonIcon, SunIcon, GlobeIcon, BellIcon, ShieldIcon, TrashIcon, SaveIcon, CheckIcon } from 'lucide-react';
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [language, setLanguage] = useState('english');
-  const { theme, setTheme } = useTheme()
+  const [isPremium, setIsPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    checkUserPlan();
+  }, []);
+
+  const checkUserPlan = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        setIsPremium(false);
+        setLoading(false);
+        return;
+      }
+
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const userPlan = userData.plan || 'free';
+        setIsPremium(userPlan === 'premium');
+      }
+    } catch (error) {
+      console.error('Error checking user plan:', error);
+      setIsPremium(false);
+    } finally {
+      setLoading(false);
+    }
+  };
   return <Layout>
       <div className="max-w-4xl mx-auto">
         <button onClick={() => history.back()}
@@ -407,22 +441,43 @@ const Settings: React.FC = () => {
                     <h3 className="font-medium text-gray-800 mb-3">
                       Subscription
                     </h3>
-                    <div className="p-4 border border-emerald-100 bg-emerald-50 rounded-lg">
-                      <div className="flex items-start">
-                        <div className="h-6 w-6 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
-                          <CheckIcon size={14} className="text-emerald-500" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-800">Free Plan</p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            You're currently on the Free plan with basic
-                            features. Upgrade to Premium for advanced AI
-                            features and unlimited meal planning.
-                          </p>
-                          <UpgradeToPremium />
+                    {loading ? (
+                      <div className="p-4 border border-gray-200 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600">Loading subscription info...</p>
+                      </div>
+                    ) : isPremium ? (
+                      <div className="p-4 border border-emerald-100 bg-emerald-50 rounded-lg">
+                        <div className="flex items-start">
+                          <div className="h-6 w-6 bg-emerald-500 rounded-full flex items-center justify-center mr-3">
+                            <CheckIcon size={14} className="text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">Premium Plan</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              You're on the Premium plan with access to all advanced features and unlimited meal planning.
+                            </p>
+                            <UpgradeToPremium />
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="p-4 border border-emerald-100 bg-emerald-50 rounded-lg">
+                        <div className="flex items-start">
+                          <div className="h-6 w-6 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                            <CheckIcon size={14} className="text-emerald-500" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">Free Plan</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              You're currently on the Free plan with basic
+                              features. Upgrade to Premium for advanced AI
+                              features and unlimited meal planning.
+                            </p>
+                            <UpgradeToPremium />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-800 mb-3">
