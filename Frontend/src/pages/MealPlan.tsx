@@ -264,7 +264,7 @@ const MealPlan: React.FC = () => {
             <span className="ml-2">Back</span>
           </button>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Your 7-Day Meal Plan</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white ">Your 7-Day Meal Plan</h1>
 
           <div className="ml-auto flex items-center space-x-3">
             <Button
