@@ -4,7 +4,9 @@ import { HomeIcon, UtensilsIcon, CalendarIcon, ShoppingBagIcon, TrophyIcon, User
 import NotificationBell from './NotificationBell';
 import '../styles/Layout.css';
 import { useEffect} from 'react';
-import { auth } from '../firebaseConfig';
+// @ts-ignore - firebaseConfig is a .js file
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 interface LayoutProps {
   children: React.ReactNode;
   hideNavigation?: boolean;
@@ -14,15 +16,41 @@ const Layout: React.FC<LayoutProps> = ({
   hideNavigation = false
 }) => {
   const [currentUserName, setCurrentUserName] = useState("Guest");
+  const [userPlan, setUserPlan] = useState("Free");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-  const user = auth.currentUser;
-  if (user) {
-    setCurrentUserName(user.displayName || user.email || "User");
-  }
-}, []);
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        setCurrentUserName(user.displayName || user.email || "User");
+        
+        // Fetch user plan from Firestore
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const plan = userData.plan || 'free';
+            setUserPlan(plan === 'premium' ? 'Premium' : 'Free');
+          }
+        } catch (error) {
+          console.error('Error fetching user plan:', error);
+          setUserPlan('Free');
+        }
+      }
+    };
+    
+    fetchUserData();
+    
+    // Set up an interval to check for plan updates every 3 seconds
+    const intervalId = setInterval(fetchUserData, 3000);
+    
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, [location.pathname]); // Re-fetch when route changes
   // Mock notifications data
   const [notifications, setNotifications] = useState([{
     id: '1',
@@ -113,7 +141,7 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
             <div className="user-details">
               <p className="user-name">{currentUserName}</p>
-              <p className="user-plan">Free Plan</p>
+              <p className="user-plan">{userPlan} Plan</p>
             </div>
           </div>
         </div>
@@ -150,7 +178,7 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
             <div className="user-details">
               <p className="user-name">{currentUserName}</p>
-              <p className="user-plan">Free Plan</p>
+              <p className="user-plan">{userPlan} Plan</p>
             </div>
           </div>
         </nav>

@@ -151,7 +151,7 @@ const LogMeal: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800">Log Meal</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white ">Log Meal</h1>
           <p className="text-sm text-gray-500">Tip: be detailed for accurate analysis</p>
         </div>
 
@@ -200,7 +200,7 @@ const LogMeal: React.FC = () => {
           {/* right - analysis */}
           <Card>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800">Nutrition Analysis</h3>
+              <h3 className="font-semibold text-gray-800 dark:text-white">Nutrition Analysis</h3>
               <div className="flex items-center gap-3">
                 <button onClick={() => { setAnalysis(null); setMealText(""); }} className="text-xs text-gray-500">Clear</button>
                 <button onClick={() => setAnalysis(null)} className="text-xs text-gray-500">Reset</button>
