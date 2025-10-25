@@ -320,9 +320,7 @@ const Features: React.FC = () => {
                   <th className="py-4 px-6 text-center text-gray-600 font-medium">
                     Premium
                   </th>
-                  <th className="py-4 px-6 text-center text-gray-600 font-medium">
-                    Enterprise
-                  </th>
+                 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -336,21 +334,15 @@ const Features: React.FC = () => {
                   <td className="py-4 px-6 text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                  
                 </tr>
                 <tr>
-                  <td className="py-4 px-6 text-gray-800">Photo Recognition</td>
+                  <td className="py-4 px-6 text-gray-800">Voice Meal Log</td>
+                   <td className="py-4 px-6 text-center">—</td>
                   <td className="py-4 px-6 text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
-                  <td className="py-4 px-6 text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                  
                 </tr>
                 <tr>
                   <td className="py-4 px-6 text-gray-800">
@@ -362,9 +354,7 @@ const Features: React.FC = () => {
                   <td className="py-4 px-6 text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                  
                 </tr>
                 <tr>
                   <td className="py-4 px-6 text-gray-800">
@@ -374,9 +364,7 @@ const Features: React.FC = () => {
                   <td className="py-4 px-6 text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                 
                 </tr>
                 <tr>
                   <td className="py-4 px-6 text-gray-800">
@@ -386,9 +374,7 @@ const Features: React.FC = () => {
                   <td className="py-4 px-6 text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                
                 </tr>
                 <tr>
                   <td className="py-4 px-6 text-gray-800">
@@ -396,15 +382,13 @@ const Features: React.FC = () => {
                   </td>
                   <td className="py-4 px-6 text-center">—</td>
                   <td className="py-4 px-6 text-center">1/month</td>
-                  <td className="py-4 px-6 text-center">Unlimited</td>
                 </tr>
                 <tr>
-                  <td className="py-4 px-6 text-gray-800">Team Management</td>
+                  <td className="py-4 px-6 text-gray-800">Challenges</td>
                   <td className="py-4 px-6 text-center">—</td>
-                  <td className="py-4 px-6 text-center">—</td>
-                  <td className="py-4 px-6 text-center">
+<td className="py-4 px-6 text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                  </td>                 
                 </tr>
               </tbody>
             </table>

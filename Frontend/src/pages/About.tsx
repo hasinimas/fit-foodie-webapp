@@ -143,14 +143,13 @@ const About: React.FC = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Dr. Rajiv Patel
+                  Hasini De Silva
                 </h3>
                 <p className="text-emerald-600 font-medium mb-3">
-                  Co-Founder & CEO
+                  Memmber 1
                 </p>
-                <p className="text-gray-600">
-                  Former nutrition researcher with 15+ years of experience in
-                  dietary science and public health initiatives.
+                 <p className="text-gray-600">
+                  Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) | Software Engineering
                 </p>
               </div>
             </div>
@@ -161,14 +160,13 @@ const About: React.FC = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Dr. Amara Silva
+                  Sahanya Kandanaarachchi
                 </h3>
                 <p className="text-blue-600 font-medium mb-3">
-                  Co-Founder & Chief Nutritionist
+                  Member 2
                 </p>
                 <p className="text-gray-600">
-                  Registered dietitian with expertise in personalized nutrition
-                  and metabolic health optimization.
+                  Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) | Software Engineering
                 </p>
               </div>
             </div>
@@ -179,14 +177,13 @@ const About: React.FC = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Sam Lee
+                 Samuditha chandrakantha
                 </h3>
                 <p className="text-purple-600 font-medium mb-3">
-                  CTO & AI Lead
+                  Member 3
                 </p>
                 <p className="text-gray-600">
-                  AI specialist with background in machine learning and
-                  nutritional data analysis from Stanford.
+                 Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) | Software Engineering
                 </p>
               </div>
             </div>
@@ -197,53 +194,17 @@ const About: React.FC = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Priya Nagarajan
+                  Senesh Jayamaha
                 </h3>
                 <p className="text-amber-600 font-medium mb-3">
-                  Head of Product
+                 Member 4
                 </p>
                 <p className="text-gray-600">
-                  Former product lead at health tech startups with passion for
-                  creating intuitive user experiences.
+                 Undergraduate At National Institute of Business Management (NIBM - Sri Lanka)  Software Engineering
                 </p>
               </div>
             </div>
-            {/* Team Member 5 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-64 bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80" alt="David Chen" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  David Chen
-                </h3>
-                <p className="text-green-600 font-medium mb-3">
-                  Lead Developer
-                </p>
-                <p className="text-gray-600">
-                  Full-stack developer with expertise in building scalable
-                  health applications and data systems.
-                </p>
-              </div>
-            </div>
-            {/* Team Member 6 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-64 bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80" alt="Elena Martinez" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Elena Martinez
-                </h3>
-                <p className="text-red-600 font-medium mb-3">
-                  Community Director
-                </p>
-                <p className="text-gray-600">
-                  Health coach with experience building supportive wellness
-                  communities and educational programs.
-                </p>
-              </div>
-            </div>
+           
           </div>
         </div>
       </section>
