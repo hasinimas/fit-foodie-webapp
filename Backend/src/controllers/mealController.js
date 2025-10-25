@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// ✅ Log a meal
+// Log a meal
 export const logMeal = async (req, res) => {
   try {
     const { userId, mealType, mealText } = req.body;
@@ -74,12 +74,64 @@ export const analyzeMeals = async (req, res) => {
       fats: `${totalFat.toFixed(1)}`,
     };
 
+    //write rounded integers to dailySummaries
+    try {
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      const dayRef = db
+        .collection("users")
+        .doc(userId)
+        .collection("dailySummaries")
+        .doc(today);
+
+      // Filter only today's meals using ISO string matching
+      const todaysMeals = meals.filter((m) => {
+        if (!m.createdAt) return false;
+
+        // handle both ISO string or Firestore timestamp safely
+        let mealDate;
+        if (typeof m.createdAt === "string") {
+          mealDate = m.createdAt.split("T")[0];
+        } else if (m.createdAt._seconds) {
+          mealDate = new Date(m.createdAt._seconds * 1000).toISOString().split("T")[0];
+        } else if (m.createdAt.toDate) {
+          mealDate = m.createdAt.toDate().toISOString().split("T")[0];
+        }
+
+        return mealDate === today;
+      });
+
+      // Combine only today's meal texts into bullet list
+      const mealDescriptions = todaysMeals
+        .map((m) => `${m.mealType}: ${m.mealText}`)
+        .join("\n");
+
+      await dayRef.set(
+        {
+          date: today,
+          description: mealDescriptions,
+          totals: {
+            calories: Math.round(totalCalories),
+            protein: Math.round(totalProtein),
+            carbs: Math.round(totalCarbs),
+            fats: Math.round(totalFat),
+          },
+          analysisCreatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+    } catch (writeErr) {
+      // non-fatal: log and continue returning the same response
+      console.error("Warning: failed to save daily summary totals:", writeErr);
+    }
+
+    // Keep the response exactly as before (no breaking change)
     res.json({ message: " Nutrition analysis ready!", analysis, meals });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Nutrition analysis failed." });
   }
 };
+
 
 //  Generate AI meal plan via Gemini API (with Firestore safety fix)
 export const generateMealPlan = async (req, res) => {
@@ -104,14 +156,14 @@ export const generateMealPlan = async (req, res) => {
       });
     }
 
-    // ✅ Save only valid plan to Firestore
+    // Save only valid plan to Firestore
     await db.collection("users").doc(userId).collection("mealPlans").add({
       plan,
       createdAt: new Date().toISOString(),
     });
 
     res.json({
-      message: "✅ AI Meal Plan Generated!",
+      message: "AI Meal Plan Generated!",
       plan,
     });
 
