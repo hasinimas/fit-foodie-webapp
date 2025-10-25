@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, UtensilsIcon, CalendarIcon, ShoppingBagIcon, TrophyIcon, UserIcon, SettingsIcon, MenuIcon, XIcon, BellIcon } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import '../styles/Layout.css';
+import { useEffect} from 'react';
+import { auth } from '../firebaseConfig';
 interface LayoutProps {
   children: React.ReactNode;
   hideNavigation?: boolean;
@@ -11,8 +13,16 @@ const Layout: React.FC<LayoutProps> = ({
   children,
   hideNavigation = false
 }) => {
+  const [currentUserName, setCurrentUserName] = useState("Guest");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+  const user = auth.currentUser;
+  if (user) {
+    setCurrentUserName(user.displayName || user.email || "User");
+  }
+}, []);
   // Mock notifications data
   const [notifications, setNotifications] = useState([{
     id: '1',
@@ -102,7 +112,7 @@ const Layout: React.FC<LayoutProps> = ({
               <UserIcon size={16} className="text-blue-600" />
             </div>
             <div className="user-details">
-              <p className="user-name">Ravi Kumar</p>
+              <p className="user-name">{currentUserName}</p>
               <p className="user-plan">Free Plan</p>
             </div>
           </div>
@@ -139,7 +149,7 @@ const Layout: React.FC<LayoutProps> = ({
               <UserIcon size={16} className="text-blue-600" />
             </div>
             <div className="user-details">
-              <p className="user-name">Ravi Kumar</p>
+              <p className="user-name">{currentUserName}</p>
               <p className="user-plan">Free Plan</p>
             </div>
           </div>
