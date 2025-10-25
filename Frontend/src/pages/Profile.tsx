@@ -1,282 +1,478 @@
-import React from 'react';
-import Layout from '../components/Layout';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import ProgressBar from '../components/ProgressBar';
-import { UserIcon, EditIcon, TrendingUpIcon, SettingsIcon, CalendarIcon, BarChart3Icon, AwardIcon, ChevronRightIcon, BellIcon } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import Layout from "../components/Layout";
+import Button from "../components/Button";
+import { auth } from "../firebaseConfig";
+import { getIdToken, onAuthStateChanged } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+
+import {
+  UserIcon,
+  HeartIcon,
+  FlameIcon,
+  AwardIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+} from "lucide-react";
+
+// Dropdown options
+const dietaryPreferences = [
+  "No Restrictions",
+  "Vegetarian",
+  "Vegan",
+  "Pescatarian",
+  "Keto",
+  "Paleo",
+  "Low Carb",
+  "Mediterranean",
+  "Gluten-Free",
+];
+
+const commonAllergies = [
+  "Dairy",
+  "Eggs",
+  "Peanuts",
+  "Tree nuts",
+  "Soy",
+  "Wheat/Gluten",
+  "Fish",
+  "Shellfish",
+];
+
+const goals = [
+  { id: "lose-weight", title: "Lose Weight" },
+  { id: "gain-muscle", title: "Gain Muscle" },
+  { id: "maintain-weight", title: "Maintain Weight" },
+  { id: "improve-energy", title: "Improve Energy Levels" },
+  { id: "eat-healthier", title: "Eat Healthier" },
+];
+
 const Profile: React.FC = () => {
-  return <Layout>
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white 500 ">Your Profile</h1>
-          <p className="text-gray-600 dark:text-white 500">View and manage your account details</p>
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<any>({});
+
+  // ✅ Fetch user profile (fixed with onAuthStateChanged)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        setError("No user logged in");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = await getIdToken(currentUser, true);
+        const res = await fetch(
+          `http://localhost:5000/api/users/${currentUser.uid}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to fetch user data");
+        setUserData(data.user);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Pre-fill editData when opening the modal
+  useEffect(() => {
+    if (isEditing && userData) {
+      setEditData({
+        ...userData,
+        allergies: userData.allergies || [],
+        goal: userData.onboarding?.goal || "",
+      });
+    }
+  }, [isEditing, userData]);
+
+  // Handle input/select changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, options } = e.target as HTMLSelectElement;
+
+    if (name === "allergies" && options) {
+      const selectedAllergies: string[] = [];
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].selected) selectedAllergies.push(options[i].value);
+      }
+      setEditData({ ...editData, [name]: selectedAllergies });
+    } else {
+      setEditData({ ...editData, [name]: value });
+    }
+  };
+
+  // Save updated profile to Firestore
+  const handleSave = async () => {
+    try {
+      if (!auth.currentUser) return;
+
+      const updatedData = {
+        ...editData,
+        onboarding: { ...userData.onboarding, goal: editData.goal },
+      };
+
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userRef, updatedData);
+
+      setUserData(updatedData);
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Try again.");
+    }
+  };
+
+  // 🌀 Loading spinner
+  if (loading)
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Card className="md:col-span-1">
-            <div className="flex flex-col items-center text-center">
-              <div className="h-24 w-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-                <UserIcon size={40} className="text-emerald-500" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white 500  mb-1">
-                Ravi Kumar
-              </h2>
-              <p className="text-gray-600  dark:text-white 500 mb-4">Kandy, Sri Lanka</p>
-              <div className="flex space-x-2 mb-6">
-                <Button size="sm" variant="outline" icon={<EditIcon size={14} />}>
-                  Edit Profile
-                </Button>
-                <Button size="sm" variant="outline" icon={<SettingsIcon size={14} />}>
-                  Settings
-                </Button>
-              </div><div className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg mb-4">
-              
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600  dark:text-white 500 ">Member Since</span>
-                  <span className="text-sm font-medium text-gray-800 dark:text-white 500 ">
-                    May 2023
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-white 500 ">
-                    Challenge Points
-                  </span>
-                  <span className="text-sm font-medium text-amber-600">
-                    200 pts
-                  </span>
-                </div>
-              </div>
-              <div className="w-full">
-                <h3 className="font-medium text-gray-800 text-left dark:text-white 500 mb-2">
-                  Connected Apps
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                    <span className="text-sm text-gray-700 dark:text-white 500 ">Google Fit</span>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                      Connected
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                    <span className="text-sm text-gray-700 dark:text-white 500 ">Apple Health</span>
-                    <Button size="sm" variant="ghost">
-                      Connect
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-          <Card className="md:col-span-2">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-bold text-lg text-gray-800 dark:text-white 500">
-                Weight Goal Progress
-              </h2>
-              <Button size="sm" variant="outline" icon={<TrendingUpIcon size={14} />}>
-                Track Weight
-              </Button>
-            </div>
-            <div className="mb-6">
-              <div className="flex justify-between mb-2">
-                <div>
-                  <span className="text-sm text-gray-500">Starting</span>
-                  <p className="font-medium text-gray-800 dark:text-white 500">75 kg</p>
-                </div>
-                <div className="text-center">
-                  <span className="text-sm text-gray-500">Current</span>
-                  <p className="font-medium text-emerald-600">73.2 kg</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm text-gray-500">Goal</span>
-                  <p className="font-medium text-gray-800 dark:text-white 500 ">72 kg</p>
-                </div>
-              </div>
-              <ProgressBar value={1.8} max={3} color="emerald" className="mb-1" />
-              <p className="text-xs text-gray-500 text-right">
-                1.8 kg lost • 1.2 kg to go
-              </p>
-            </div>
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-800 dark:text-white 500 mb-3">
-                Dietary Preferences
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-white 500 ">Diet Type</p>
-                    <p className="text-sm text-gray-600 dark:text-white 500">Mostly vegetarian</p>
-                  </div>
-                  <Button size="sm" variant="ghost" icon={<EditIcon size={14} />}>
-                    Edit
-                  </Button>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-white 500">
-                      Allergies & Restrictions
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-white 500 ">Lactose intolerance</p>
-                  </div>
-                  <Button size="sm" variant="ghost" icon={<EditIcon size={14} />}>
-                    Edit
-                  </Button>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-white 500 ">Calorie Target</p>
-                    <p className="text-sm text-gray-600 dark:text-white 500 ">
-                      2,100 calories per day
-                    </p>
-                  </div>
-                  <Button size="sm" variant="ghost" icon={<EditIcon size={14} />}>
-                    Edit
-                  </Button>
-                </div>
-              </div>
+      </Layout>
+    );
+
+  if (error) return <Layout>Error: {error}</Layout>;
+  if (!userData) return <Layout>No user data found.</Layout>;
+
+  const {
+    firstName,
+    lastName,
+    email,
+    age,
+    gender,
+    dietPreference,
+    allergies,
+    onboarding,
+    points,
+    badges,
+    createdAt,
+    quizAnswers,
+  } = userData;
+
+  return (
+    <Layout>
+      <div className="max-w-6xl mx-auto p-6 space-y-8">
+        {/* Hero Section */}
+        <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 bg-gradient-to-r from-emerald-400 to-blue-500 text-white rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center gap-4">
+            <div className="bg-white p-2 rounded-full">
+              <UserIcon className="text-emerald-500 w-12 h-12" />
             </div>
             <div>
-              <h3 className="font-medium text-gray-800  dark:text-white 500 mb-3">Weekly Summary</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-3 bg-emerald-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-600">Avg. Calories</span>
-                    <CalendarIcon size={14} className="text-emerald-500" />
-                  </div>
-                  <p className="text-lg font-medium text-gray-800">1,850</p>
-                  <p className="text-xs text-emerald-600">-12% vs target</p>
-                </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-600">Protein</span>
-                    <BarChart3Icon size={14} className="text-blue-500" />
-                  </div>
-                  <p className="text-lg font-medium text-gray-800">82g/day</p>
-                  <p className="text-xs text-amber-600">-9% vs target</p>
-                </div>
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-600">Water</span>
-                    <BarChart3Icon size={14} className="text-amber-500" />
-                  </div>
-                  <p className="text-lg font-medium text-gray-800">1.8L/day</p>
-                  <p className="text-xs text-red-600">-28% vs target</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-600">Plant Meals</span>
-                    <AwardIcon size={14} className="text-purple-500" />
-                  </div>
-                  <p className="text-lg font-medium text-gray-800">8 meals</p>
-                  <p className="text-xs text-emerald-600">+33% vs last week</p>
-                </div>
-              </div>
+              <h1 className="text-3xl font-bold">
+                {firstName} {lastName}
+              </h1>
+              <p className="text-sm opacity-80">{email}</p>
             </div>
-          </Card>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              className="bg-white text-emerald-600 hover:bg-gray-100 shadow-md"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit Profile
+            </Button>
+            <Button
+              className="bg-red-500 text-white hover:bg-red-600 shadow-md"
+              onClick={() => {
+                auth.signOut().then(() => {
+                  alert("Logged out successfully!");
+                  window.location.href = "/"; // redirect to home or login page
+                });
+              }}
+            >
+              Log Out
+            </Button>
+          </div>
         </div>
+
+        {/* Personal & Dietary Info Panels */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-lg text-gray-800 dark:text-white 500">
-                Notification Preferences
-              </h2>
-              <BellIcon size={20} className="text-gray-400" />
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-white 500">Daily Reminders</p>
-                  <p className="text-sm text-gray-500">
-                    Meal logging reminders
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-white 500 ">Weekly Reports</p>
-                  <p className="text-sm text-gray-500 dark:text-white 500 ">Progress summaries</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-white 500 ">Challenge Updates</p>
-                  <p className="text-sm text-gray-500">
-                    New and completed challenges
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-white 500 ">AI Suggestions</p>
-                  <p className="text-sm text-gray-500">
-                    Personalized nutrition tips
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-            </div>
-          </Card>
-          <Card>
-            <h2 className="font-bold text-lg text-gray-800 dark:text-white 500 mb-4">
-              Account Settings
-            </h2>
-            <div className="space-y-2">
-              <button className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                <div className="flex items-center">
-                  <UserIcon size={16} className="text-gray-500 mr-3" />
-                  <span className="font-medium text-gray-800">
-                    Personal Information
-                  </span>
-                </div>
-                <ChevronRightIcon size={16} className="text-gray-400" />
-              </button>
-              <button className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                <div className="flex items-center">
-                  <SettingsIcon size={16} className="text-gray-500 mr-3" />
-                  <span className="font-medium text-gray-800">
-                    App Preferences
-                  </span>
-                </div>
-                <ChevronRightIcon size={16} className="text-gray-400" />
-              </button>
-              <button className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                <div className="flex items-center">
-                  <BellIcon size={16} className="text-gray-500 mr-3" />
-                  <span className="font-medium text-gray-800">
-                    Notifications
-                  </span>
-                </div>
-                <ChevronRightIcon size={16} className="text-gray-400" />
-              </button>
-              <button className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                <div className="flex items-center">
-                  <CalendarIcon size={16} className="text-gray-500 mr-3" />
-                  <span className="font-medium text-gray-800">Export Data</span>
-                </div>
-                <ChevronRightIcon size={16} className="text-gray-400" />
-              </button>
-            </div>
-            <div className="mt-6">
-              <Button variant="outline" fullWidth>
-                Log Out
-              </Button>
-            </div>
-          </Card>
+          <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100">
+            <h2 className="text-xl font-semibold mb-4">Personal Info</h2>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-gray-400" /> Age: {age}
+              </li>
+              <li className="flex items-center gap-2">
+                <UserIcon className="w-5 h-5 text-gray-400" /> Gender: {gender}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircleIcon className="w-5 h-5 text-green-500" /> Onboarding
+                Completed: {onboarding?.completedAt ? "Yes" : "No"}
+              </li>
+              <li className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-gray-400" /> Joined:{" "}
+                {new Date(createdAt).toLocaleDateString()}
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100">
+            <h2 className="text-xl font-semibold mb-4">Dietary Info</h2>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-center gap-2">
+                <HeartIcon className="w-5 h-5 text-pink-500" /> Diet Preference:{" "}
+                {dietPreference}
+              </li>
+              <li className="flex items-center gap-2">
+                <FlameIcon className="w-5 h-5 text-orange-400" /> Goal:{" "}
+                {onboarding?.goal}
+              </li>
+              <li>
+                <strong>Allergies:</strong>{" "}
+                {allergies?.join(", ") || "None"}
+              </li>
+            </ul>
+          </div>
         </div>
+
+        {/* Points & Badges */}
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex-1 bg-gradient-to-r from-yellow-100 to-yellow-200 shadow-md rounded-2xl p-6 flex flex-col items-center justify-center border border-gray-100">
+            <HeartIcon className="w-8 h-8 text-red-500 mb-2" />
+            <p className="text-sm font-semibold opacity-80">Points</p>
+            <p className="text-3xl font-bold">{points}</p>
+          </div>
+          <div className="flex-1 bg-white shadow-md rounded-2xl p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <AwardIcon className="w-5 h-5 text-yellow-500" /> Badges
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {badges?.length > 0 ? (
+                badges.map((badge: string, idx: number) => (
+                  <span
+                    key={idx}
+                    className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm flex items-center gap-1"
+                  >
+                    <AwardIcon className="w-4 h-4" /> {badge}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-500">No badges yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Quiz Answers Accordion */}
+        {quizAnswers && Object.keys(quizAnswers).length > 0 && (
+          <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100">
+            <h3 className="text-xl font-semibold mb-3">Quiz Answers</h3>
+            {Object.entries(quizAnswers).map(([question, answer], idx) => (
+              <div key={idx} className="mb-2 p-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-600">
+                  <strong>{question.replace(/-/g, " ")}</strong>
+                </p>
+                <p className="text-gray-800">{answer}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {isEditing && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl w-full max-w-lg shadow-xl overflow-y-auto max-h-[90vh] p-6">
+              <h2 className="text-2xl font-bold mb-6 text-center text-emerald-600">
+                Edit Profile
+              </h2>
+
+              {/* Sections */}
+              <div className="space-y-6">
+                {/* Name */}
+                <div className="border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                    <UserIcon className="w-5 h-5 text-emerald-500" /> Name
+                  </h3>
+                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-gray-500 text-sm mb-1">
+                        Current: {firstName}
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={editData.firstName}
+                        onChange={handleChange}
+                        placeholder="First Name"
+                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:ring-emerald-300 focus:ring-2 outline-none transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-500 text-sm mb-1">
+                        Current: {lastName}
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={editData.lastName}
+                        onChange={handleChange}
+                        placeholder="Last Name"
+                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:ring-emerald-300 focus:ring-2 outline-none transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Personal Info */}
+                <div className="border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                    <CalendarIcon className="w-5 h-5 text-blue-500" /> Personal
+                    Info
+                  </h3>
+                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-gray-500 text-sm mb-1">
+                        Current: {age}
+                      </label>
+                      <input
+                        type="number"
+                        name="age"
+                        value={editData.age}
+                        onChange={handleChange}
+                        placeholder="Age"
+                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:ring-blue-300 focus:ring-2 outline-none transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-500 text-sm mb-1">
+                        Current: {gender}
+                      </label>
+                      <select
+                        name="gender"
+                        value={editData.gender}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:ring-blue-300 focus:ring-2 outline-none transition"
+                      >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Diet & Goal */}
+                <div className="border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                    <FlameIcon className="w-5 h-5 text-orange-500" /> Diet & Goal
+                  </h3>
+                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-gray-500 text-sm mb-1">
+                        Current: {dietPreference}
+                      </label>
+                      <select
+                        name="dietPreference"
+                        value={editData.dietPreference}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:ring-orange-300 focus:ring-2 outline-none transition"
+                      >
+                        {dietaryPreferences.map((diet) => (
+                          <option key={diet} value={diet}>
+                            {diet}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-500 text-sm mb-1">
+                        Current: {onboarding?.goal}
+                      </label>
+                      <select
+                        name="goal"
+                        value={editData.goal}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-2 rounded-xl focus:ring-orange-300 focus:ring-2 outline-none transition"
+                      >
+                        {goals.map((goal) => (
+                          <option key={goal.id} value={goal.title}>
+                            {goal.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Allergies */}
+                <div className="border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                    <HeartIcon className="w-5 h-5 text-pink-500" /> Allergies
+                  </h3>
+                  <label className="block text-gray-500 text-sm mb-2">
+                    Current: {allergies?.join(", ") || "None"}
+                  </label>
+                  <select
+                    name="allergies"
+                    value={editData.allergies}
+                    onChange={handleChange}
+                    multiple
+                    className="w-full border border-gray-300 px-4 py-2 rounded-xl h-28 focus:ring-pink-300 focus:ring-2 outline-none transition"
+                  >
+                    {commonAllergies.map((allergy) => (
+                      <option key={allergy} value={allergy}>
+                        {allergy}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Hold Ctrl (Windows) or Cmd (Mac) to select multiple
+                  </p>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-emerald-500 text-white hover:bg-emerald-600"
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      <div className="w-full md:w-auto">
+        <Button
+          variant="outline"
+          size="lg"
+          fullWidth
+          className="text-gray-800 border-3 border-gradient-to-r from-indigo-500 via-purple-500 to-blue-600
+                    bg-green-500 hover:bg-green-200 hover:shadow-lg rounded-2xl py-2.5 px-6
+                    flex items-center justify-center gap-3 transition-all duration-300"
+        >
+          <span className="tracking-wide font-semibold">View Detailed User Reports</span>
+        </Button>
       </div>
-    </Layout>;
+
+      </div>
+    </Layout>
+  );
 };
+
 export default Profile;
