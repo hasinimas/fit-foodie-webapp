@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import MoodTracker from '../components/MoodTracker';
-import { 
-  UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon, 
-  HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon 
+import {
+  UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon,
+  HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon
 } from 'lucide-react';
 // @ts-ignore
 import { auth, db } from '../firebaseConfig';
@@ -61,7 +62,7 @@ interface GoalContent {
   quickActions: QuickAction[];
 }
 
-// ✅ Default user data
+//  Default user data
 const defaultUserData: UserData = {
   name: '',
   goal: 'eat-healthier',
@@ -78,6 +79,63 @@ const Dashboard: React.FC = () => {
   const [userData, setUserData] = useState<UserData>(defaultUserData);
   const [aiResponse, setAiResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [meals, setMeals] = useState<any[]>([]);   //state
+
+  // NEW: daily summaries state (minimal change)
+  const [dailySummaries, setDailySummaries] = useState<any[]>([]);
+
+  // Fetch meal history from Firebase (unchanged)
+  useEffect(() => {
+    const fetchMeals = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const mealRef = collection(db, "users", user.uid, "meals");
+        const q = query(mealRef, orderBy("createdAt", "desc"), limit(10));
+        const snap = await getDocs(q);
+        const mealData = snap.docs.map(doc => doc.data());
+
+        //Fetch today's Day Total summary
+        const today = new Date().toISOString().split("T")[0];
+        const summaryRef = doc(db, "users", user.uid, "dailySummaries", today);
+        const summarySnap = await getDoc(summaryRef);
+        if (summarySnap.exists()) {
+          const summary = summarySnap.data();
+          mealData.unshift({
+            mealType: summary.mealType || "Day Total",
+            mealText: summary.description || "No summary available",
+            createdAt: summary.analysisCreatedAt || new Date().toISOString(),
+          });
+        }
+
+        setMeals(mealData);
+      } catch (e) {
+        console.error("Error fetching meals:", e);
+      }
+    };
+    fetchMeals();
+  }, []);
+
+
+  // NEW: fetch daily summaries (only this new effect)
+  useEffect(() => {
+    const fetchDailySummaries = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const dailyRef = collection(db, "users", user.uid, "dailySummaries");
+        // fetch without orderBy and sort client-side for safety
+        const snap = await getDocs(dailyRef);
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // sort descending by id (YYYY-MM-DD) so newest first
+        list.sort((a: any, b: any) => b.id.localeCompare(a.id));
+        setDailySummaries(list);
+      } catch (e) {
+        console.error("Error fetching daily summaries:", e);
+      }
+    };
+    fetchDailySummaries();
+  }, []);
 
   // Fetch user data from Firebase and merge with defaults
   useEffect(() => {
@@ -309,35 +367,96 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Meal History */}
-        <Card>
-          <h2 className="nutrition-card-title">Meal History</h2>
-          <div className="overflow-x-auto">
-            <table className="meal-table">
+        <Card className="backdrop-blur-lg bg-white/60 border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
+          <h2 className="nutrition-card-title mb-4 text-gray-800">Meal History</h2>
+
+          <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
+            <table className="min-w-full text-sm text-gray-700">
               <thead>
-                <tr className="table-header">
-                  <th className="table-header-cell">Time</th>
-                  <th className="table-header-cell">Meal</th>
-                  <th className="table-header-cell">Calories</th>
-                  <th className="table-header-cell">Protein</th>
-                  <th className="table-header-cell">Carbs</th>
-                  <th className="table-header-cell">Fats</th>
+                <tr className="bg-emerald-100/70 text-gray-800 text-left">
+                  <th className="py-3 px-4 font-semibold">Meal Type</th>
+                  <th className="py-3 px-4 font-semibold">Description</th>
+                  <th className="py-3 px-4 font-semibold text-right">Total Calories</th>
+                  <th className="py-3 px-4 font-semibold text-right">Protein</th>
+                  <th className="py-3 px-4 font-semibold text-right">Carbs</th>
+                  <th className="py-3 px-4 font-semibold text-right">Fat</th>
+                  <th className="py-3 px-4 font-semibold">Logged At</th>
                 </tr>
               </thead>
               <tbody>
-                {userData.meals.length > 0 ? (
-                  userData.meals.map((meal, index) => (
-                    <tr key={index} className="table-body-row">
-                      <td className="table-cell">{meal.time}</td>
-                      <td className="table-cell">{meal.meal}</td>
-                      <td className="table-cell">{meal.calories} kcal</td>
-                      <td className="table-cell">{meal.protein}g</td>
-                      <td className="table-cell">{meal.carbs}g</td>
-                      <td className="table-cell">{meal.fats}g</td>
-                    </tr>
-                  ))
+                {dailySummaries.length > 0 ? (
+                  dailySummaries.map((day) => {
+                    const totals = day.totals || {};
+                    const formattedDate = new Date(`${day.id}T00:00:00`).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    });
+
+                    // order of meal rows
+                    const types = ["breakfast", "lunch", "dinner", "snack"];
+
+                    // find first existing meal index to show totals on first row
+                    const firstExistingIndex = types.findIndex(t => !!day[t]);
+
+                    return (
+                      <React.Fragment key={day.id}>
+                        {types.map((t, idx) => {
+                          const meal = day[t];
+                          if (!meal) return null;
+
+                          const showTotals = idx === firstExistingIndex;
+
+                          return (
+                            <tr key={`${day.id}-${t}`} className="border-b border-gray-100 hover:bg-emerald-50/60 transition-colors">
+                              <td className="py-3 px-4 capitalize font-medium">{t}</td>
+                              <td className="py-3 px-4 max-w-md truncate" title={meal.mealText}>{meal.mealText}</td>
+
+                              <td className="py-3 px-4 text-right">
+                                {showTotals && totals.calories ? <span className="font-semibold">{totals.calories}</span> : <span>—</span>}
+                              </td>
+
+                              <td className="py-3 px-4 text-right">{showTotals && totals.protein ? `${totals.protein} g` : "—"}</td>
+                              <td className="py-3 px-4 text-right">{showTotals && totals.carbs ? `${totals.carbs} g` : "—"}</td>
+                              <td className="py-3 px-4 text-right">{showTotals && totals.fats ? `${totals.fats} g` : "—"}</td>
+
+                              <td className="py-3 px-4 text-gray-500">
+                                {meal.createdAt ? (
+                                  new Date(meal.createdAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+                                ) : formattedDate}
+                              </td>
+                            </tr>
+                          );
+                        })}
+
+                        {/* Day totals separator row */}
+                        <tr className="bg-emerald-50/60 border-t border-emerald-100">
+                          <td className="py-3 px-4 font-semibold text-emerald-700">Day Total</td>
+
+                          {/* Show bullet list for description */}
+                          <td className="py-3 px-4 whitespace-pre-line text-sm text-gray-700">
+                            {day.description ? (
+                              <ul className="list-disc pl-5 space-y-1">
+                                {day.description.split("\n").map((line: string, i: number) => (
+                                  <li key={i}>{line}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <span>—</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-800">{totals.calories ?? "—"}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-800">{totals.protein ? `${totals.protein} g` : "—"}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-800">{totals.carbs ? `${totals.carbs} g` : "—"}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-800">{totals.fats ? `${totals.fats} g` : "—"}</td>
+                          <td className="py-3 px-4 text-gray-500">{formattedDate}</td>
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="table-empty">No meals logged today</td>
+                    <td colSpan={7} className="text-center py-6 text-gray-500">No daily logs yet. Go log meals from <b>Log Meal</b>!</td>
                   </tr>
                 )}
               </tbody>
@@ -350,3 +469,5 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
+
