@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import { MicIcon, SendIcon, BarChart3Icon, RotateCcwIcon, InfoIcon } from "lucide-react";
+import { MicIcon, SendIcon, BarChart3Icon, InfoIcon } from "lucide-react";
+// @ts-ignore - firebaseConfig is a .js file
 import { auth } from "../firebaseConfig";
+import { createMealLoggedNotification } from "../services/notificationService";
 
 const API = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000/api";
 
@@ -85,6 +87,14 @@ const LogMeal: React.FC = () => {
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "Failed");
       setToast({ kind: "success", text: j.message || `${mealType} saved.` });
+      
+      // Create notification for meal logged
+      try {
+        await createMealLoggedNotification(user.uid, mealText, j.calories || 0);
+      } catch (notifError) {
+        console.error('Error creating notification:', notifError);
+      }
+      
       setMealText("");
     } catch (e) {
       console.error(e);

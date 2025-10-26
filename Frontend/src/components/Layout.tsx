@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, UtensilsIcon, CalendarIcon, ShoppingBagIcon, TrophyIcon, UserIcon, SettingsIcon, MenuIcon, XIcon, BellIcon } from 'lucide-react';
+import { HomeIcon, UtensilsIcon, CalendarIcon, ShoppingBagIcon, TrophyIcon, UserIcon, SettingsIcon, MenuIcon, XIcon } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import '../styles/Layout.css';
 import { useEffect} from 'react';
 // @ts-ignore - firebaseConfig is a .js file
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 interface LayoutProps {
   children: React.ReactNode;
   hideNavigation?: boolean;
@@ -51,37 +51,107 @@ const Layout: React.FC<LayoutProps> = ({
     // Cleanup interval on unmount
     return () => clearInterval(intervalId);
   }, [location.pathname]); // Re-fetch when route changes
-  // Mock notifications data
-  const [notifications, setNotifications] = useState([{
-    id: '1',
-    title: 'Challenge Progress',
-    message: "You're halfway through your Hydration Hero challenge!",
-    type: 'challenge',
-    time: '2h ago',
-    read: false
-  }, {
-    id: '2',
-    title: 'Meal Reminder',
-    message: "Don't forget to log your lunch today",
-    type: 'reminder',
-    time: '5h ago',
-    read: false
-  }, {
-    id: '3',
-    title: 'New Badge Unlocked',
-    message: "You've earned the Newbie badge!",
-    type: 'achievement',
-    time: '1d ago',
-    read: true
-  }]);
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notif => notif.id === id ? {
-      ...notif,
-      read: true
-    } : notif));
+
+  // Real-time notifications from user document
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Set up real-time listener for user's notifications from user document
+    const userDocRef = doc(db, 'users', user.uid);
+
+    const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data();
+        const userNotifications = userData.notifications || [];
+        
+        // Sort by createdAt descending (newest first)
+        const sortedNotifications = userNotifications
+          .map((notif: any, index: number) => ({
+            ...notif,
+            id: notif.id || `notif-${index}`,
+            time: formatTime(notif.createdAt)
+          }))
+          .sort((a: any, b: any) => {
+            const timeA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const timeB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return timeB - timeA;
+          });
+        
+        console.log('Notifications updated:', sortedNotifications);
+        setNotifications(sortedNotifications);
+      }
+    }, (error) => {
+      console.error('Error fetching notifications:', error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Format timestamp to relative time
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return 'Just now';
+    
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
-  const clearAllNotifications = () => {
-    setNotifications([]);
+
+  const markAsRead = async (id: string) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      console.log('Marking notification as read:', id);
+      
+      // Find the notification in the array
+      const notificationToUpdate = notifications.find(n => n.id === id);
+      if (!notificationToUpdate) {
+        console.error('Notification not found:', id);
+        return;
+      }
+
+      // Create updated notifications array with the read flag set to true
+      const updatedNotifications = notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      );
+
+      // Update user document with modified notifications array
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        notifications: updatedNotifications
+      });
+      
+      console.log('Successfully marked as read');
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const clearAllNotifications = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      // Clear all notifications by setting empty array
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        notifications: []
+      });
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+    }
   };
   const navItems = [{
     path: '/dashboard',

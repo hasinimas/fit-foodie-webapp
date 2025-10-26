@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BellIcon, X as XIcon } from 'lucide-react';
+import { BellIcon } from 'lucide-react';
 interface Notification {
   id: string;
   title: string;
@@ -20,6 +20,22 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
+  
+  console.log('NotificationBell - Total notifications:', notifications.length);
+  console.log('NotificationBell - Unread count:', unreadCount);
+  console.log('NotificationBell - Notifications:', notifications);
+  
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to clear all notifications?')) {
+      onClearAll();
+    }
+  };
+  
+  const handleMarkAsRead = (id: string) => {
+    console.log('Clicking notification:', id);
+    onMarkAsRead(id);
+  };
+  
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'challenge':
@@ -52,7 +68,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
           <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg overflow-hidden z-20 border border-gray-200">
             <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
               <h3 className="font-medium text-gray-800">Notifications</h3>
-              {notifications.length > 0 && <button onClick={onClearAll} className="text-xs text-gray-500 hover:text-gray-700">
+              {notifications.length > 0 && <button onClick={handleClearAll} className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
                   Clear all
                 </button>}
             </div>
@@ -60,7 +76,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
               {notifications.length === 0 ? <div className="p-4 text-center text-gray-500">
                   No notifications yet
                 </div> : <div>
-                  {notifications.map(notification => <div key={notification.id} className={`p-3 border-b border-gray-100 flex items-start ${!notification.read ? 'bg-blue-50' : ''}`} onClick={() => onMarkAsRead(notification.id)}>
+                  {notifications.map(notification => <div key={notification.id} className={`p-3 border-b border-gray-100 flex items-start cursor-pointer hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50' : ''}`} onClick={() => handleMarkAsRead(notification.id)}>
                       {getTypeIcon(notification.type)}
                       <div className="ml-3 flex-1">
                         <div className="flex justify-between items-start">

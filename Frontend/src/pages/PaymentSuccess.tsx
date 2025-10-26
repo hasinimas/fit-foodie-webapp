@@ -6,6 +6,7 @@ import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import Layout from '../components/Layout';
 import { CheckCircleIcon, XCircleIcon } from 'lucide-react';
+import { createPremiumUpgradeNotification } from '../services/notificationService';
 
 const PaymentSuccess: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -58,6 +59,9 @@ const PaymentSuccess: React.FC = () => {
               subscriptionId,
               expiresIn: '30 days'
             });
+            
+            // Create a notification for premium upgrade
+            await createPremiumUpgradeNotification(currentUser.uid);
             
             setStatus('success');
             setMessage('Payment successful! Your premium account is now active.');
