@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebaseConfig';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import Button from './Button';
+import { createNotification } from '../services/notificationService';
 
 const UpgradeToPremium: React.FC = () => {
   const [isPremium, setIsPremium] = useState(false);
@@ -60,6 +61,15 @@ const UpgradeToPremium: React.FC = () => {
                 expiredAt: serverTimestamp()
               }
             });
+            
+            // Create notification for subscription expiry
+            await createNotification({
+              userId: currentUser.uid,
+              title: 'Premium Subscription Expired',
+              message: 'Your premium subscription has expired. Upgrade again to continue enjoying premium features!',
+              type: 'info',
+            });
+            
             setIsPremium(false);
           } else {
             console.log('User plan: premium (valid until', expiresAt.toLocaleDateString(), ')');
@@ -115,6 +125,14 @@ const UpgradeToPremium: React.FC = () => {
           status: 'cancelled',
           cancelledAt: serverTimestamp() // Real server time
         } : null
+      });
+
+      // Create notification for premium cancellation
+      await createNotification({
+        userId: currentUser.uid,
+        title: 'Premium Subscription Cancelled',
+        message: 'Your premium subscription has been cancelled. You are now on the free plan.',
+        type: 'info',
       });
 
       setIsPremium(false);
