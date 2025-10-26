@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 import { HeartIcon, GlobeIcon, UsersIcon, LightbulbIcon, ArrowRightIcon } from 'lucide-react';
+import seneshImage from '../assets/senesh.jpeg';
+import sahanyaImage from '../assets/sahanya.jpg';
+import samudithaImage from '../assets/samuditha.jpg';
+import hasiniImage from '../assets/hasini.jpg';
+
+
 const About: React.FC = () => {
   return <div className="min-h-screen bg-white">
       <Navbar />
@@ -135,75 +141,94 @@ const About: React.FC = () => {
               transforming nutritional health through technology.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 ">
             {/* Team Member 1 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-64 bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80" alt="Dr. Rajiv Patel" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
+
+            <div className="shadow-md rounded-lg overflow-hidden flex-shrink-0">
+<div className="h-56">
+   <img
+      src={hasiniImage}
+      alt="Hasini De Silva"
+      className="w-full h-full object-contain object-center"
+    />              </div>
+              <div className="p-4 bg-white dark:bg-gray-800">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 text-center"> 
+
                   Hasini De Silva
                 </h3>
-                <p className="text-emerald-600 font-medium mb-3">
+                <p className="text-emerald-600 font-medium text-center mb-3">
                   Memmber 1
                 </p>
-                 <p className="text-gray-600">
+                     <p className="text-gray-600 dark:text-gray-400 text-sm text-center">
+
                   Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) | Software Engineering
                 </p>
               </div>
             </div>
             {/* Team Member 2 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-64 bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80" alt="Dr. Amara Silva" className="w-full h-full object-cover" />
+            <div className="shadow-md rounded-lg overflow-hidden flex-shrink-0">
+<div className="h-56">    <img
+      src={sahanyaImage}
+      alt="Sahanya Kandanaarachchi"
+      className="w-full h-full object-contain object-center"
+    />
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <div className="p-4 bg-white dark:bg-gray-800">
+    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 text-center"> 
                   Sahanya Kandanaarachchi
                 </h3>
-                <p className="text-blue-600 font-medium mb-3">
+                <p className="text-blue-600 font-medium mb-3 text-center">
                   Member 2
                 </p>
-                <p className="text-gray-600">
+                    <p className="text-gray-600 dark:text-gray-400 text-sm text-center">
+
                   Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) | Software Engineering
                 </p>
               </div>
             </div>
             {/* Team Member 3 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-64 bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80" alt="Sam Lee" className="w-full h-full object-cover" />
+<div className="shadow-md rounded-lg overflow-hidden flex-shrink-0">
+  <div className="h-56">   <img
+      src={samudithaImage}
+      alt="Samudita chandrakantha"
+     className="w-full h-full object-contain object-center"
+    />
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <div className="p-4 bg-white dark:bg-gray-800">
+    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 text-center"> 
                  Samuditha chandrakantha
                 </h3>
-                <p className="text-purple-600 font-medium mb-3">
+                <p className="text-purple-600 font-medium  text-center mb-3">
                   Member 3
                 </p>
-                <p className="text-gray-600">
+    <p className="text-gray-600 dark:text-gray-400 text-sm text-center">
                  Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) | Software Engineering
                 </p>
               </div>
             </div>
-            {/* Team Member 4 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="h-64 bg-gray-200">
-                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80" alt="Priya Nagarajan" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Senesh Jayamaha
-                </h3>
-                <p className="text-amber-600 font-medium mb-3">
-                 Member 4
-                </p>
-                <p className="text-gray-600">
-                 Undergraduate At National Institute of Business Management (NIBM - Sri Lanka)  Software Engineering
-                </p>
-              </div>
-            </div>
+
+          {/* Team Member 4 - Senesh Jayamaha */}
+            <div className="shadow-md rounded-lg overflow-hidden flex-shrink-0">
+<div className="h-56">   
+    <img
+      src={seneshImage}
+      alt="Senesh Jayamaha"
+     className="w-full h-full object-contain object-center"
+    />
+    {/* ===> END CHANGE <=== */}
+  </div>
+  <div className="p-4 bg-white dark:bg-gray-800">
+    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 text-center"> 
+      Senesh Jayamaha
+    </h3>
+    <p className="text-amber-600  font-medium  text-center mb-3">
+      Member 4
+    </p>
+    <p className="text-gray-600 dark:text-gray-400 text-sm text-center">
+      Undergraduate At National Institute of Business Management (NIBM - Sri Lanka) Software Engineering
+    </p>
+  </div>
+</div>
            
           </div>
         </div>
