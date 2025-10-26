@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { auth } from "../firebaseConfig";
@@ -48,13 +49,14 @@ const goals = [
 ];
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate(); 
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
 
-  // ✅ Fetch user profile (fixed with onAuthStateChanged)
+  // Fetch user profile (fixed with onAuthStateChanged)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
@@ -465,6 +467,7 @@ const Profile: React.FC = () => {
           className="text-gray-800 border-3 border-gradient-to-r from-indigo-500 via-purple-500 to-blue-600
                     bg-green-500 hover:bg-green-200 hover:shadow-lg rounded-2xl py-2.5 px-6
                     flex items-center justify-center gap-3 transition-all duration-300"
+                    onClick={() => navigate("/reports")}
         >
           <span className="tracking-wide font-semibold">View Detailed User Reports</span>
         </Button>

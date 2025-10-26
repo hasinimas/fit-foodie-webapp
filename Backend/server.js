@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mealRoutes from "./src/routes/meals.js";
 import userRoutes from "./src/routes/users.js";
+import reportsRouter from "./src/routes/reports.js";
 
 dotenv.config();
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use("/api/meals", mealRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/reports", reportsRouter); 
 
 // Health Check
 app.get("/", (req, res) => res.send("FitFoodie Backend Running ✅"));
