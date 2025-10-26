@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
-import { UtensilsIcon, BrainIcon, ShoppingBagIcon, TrophyIcon, BarChartIcon, CalendarIcon, MessageCircleIcon, ActivityIcon, UserIcon, HeartIcon, LockIcon, ZapIcon, CheckIcon, ArrowRightIcon, Mic } from 'lucide-react';
+import { UtensilsIcon, BrainIcon, ShoppingBagIcon, TrophyIcon, BarChartIcon, CalendarIcon,   CheckIcon, ArrowRightIcon, Mic } from 'lucide-react';
 const Features: React.FC = () => {
   return <div className="min-h-screen bg-white">
       <Navbar />

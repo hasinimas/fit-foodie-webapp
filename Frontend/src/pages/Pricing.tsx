@@ -71,7 +71,7 @@ const Pricing: React.FC = () => {
                   <li className="flex items-start">
                     <CheckIcon size={20} className="text-emerald-500 mr-3 flex-shrink-0 mt-0.5" />
                     <span className="text-gray-600">
-                      Food photo recognition
+                      Voice Meal Log	
                     </span>
                   </li>
                   <li className="flex items-start">
@@ -216,11 +216,9 @@ const Pricing: React.FC = () => {
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="py-4 px-6 bg-white text-gray-800 font-medium">
-                    Food Photo Recognition
+                    Voice Log Meal
                   </td>
-                  <td className="py-4 px-6 bg-white text-center">
-                    <CheckIcon size={20} className="text-emerald-500 mx-auto" />
-                  </td>
+                  <td className="py-4 px-6 bg-white text-center">—</td>
                   <td className="py-4 px-6 bg-white text-center">
                     <CheckIcon size={20} className="text-emerald-500 mx-auto" />
                   </td>
@@ -284,7 +282,7 @@ const Pricing: React.FC = () => {
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="py-4 px-6 bg-white text-gray-800 font-medium">
-                    AI Nutritional Coach
+                   Challenges	
                   </td>
                   <td className="py-4 px-6 bg-white text-center">—</td>
                   <td className="py-4 px-6 bg-white text-center">
