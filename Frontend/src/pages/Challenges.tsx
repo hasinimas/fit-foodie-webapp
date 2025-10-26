@@ -312,9 +312,9 @@ const Challenges: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Daily Water */}
             <Card className="p-5 shadow-md hover:shadow-lg transition">
-              <h3 className="text-lg font-semibold mb-1">Daily Hydration 💧</h3>
+              <h3 className="text-lg font-semibold  dark:text-white  mb-1 ">Daily Hydration 💧</h3>
               <ProgressBar value={cupsDrunk} max={dailyWaterGoal} color="blue" />
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 dark:text-white-300 mt-2">
                 {cupsDrunk}/{dailyWaterGoal.toFixed(1)} cups today
               </p>
               <Button onClick={() => logProgress("waterIntake")} disabled={cupsDrunk >= dailyWaterGoal}>
@@ -324,7 +324,7 @@ const Challenges: React.FC = () => {
 
             {/* Daily Meals */}
             <Card className="p-5 shadow-md hover:shadow-lg transition">
-              <h3 className="text-lg font-semibold mb-1">Meal Logger 🍽️</h3>
+              <h3 className="text-lg font-semibold dark:text-white mb-1">Meal Logger 🍽️</h3>
               <ProgressBar value={mealsLogged} max={DAILY_MEAL_GOAL} color="emerald" />
               <p className="text-sm text-gray-600 mt-2">
                 {mealsLogged}/{DAILY_MEAL_GOAL} meals logged today
@@ -336,7 +336,7 @@ const Challenges: React.FC = () => {
 
             {/* Weekly Water */}
             <Card className="md:col-span-2 p-5 shadow-md hover:shadow-lg transition">
-              <h3 className="text-lg font-semibold mb-1">Weekly Hydration Challenge 🏆</h3>
+              <h3 className="text-lg font-semibold dark:text-white mb-1">Weekly Hydration Challenge 🏆</h3>
               <ProgressBar value={weeklyProgressWater} max={WEEKLY_WATER_GOAL} color="amber" />
               <p className="text-sm text-gray-600 mt-2">
                 {weeklyProgressWater}/{WEEKLY_WATER_GOAL} cups this week
@@ -345,7 +345,7 @@ const Challenges: React.FC = () => {
 
             {/* Weekly Meals */}
             <Card className="md:col-span-2 p-5 shadow-md hover:shadow-lg transition">
-              <h3 className="text-lg font-semibold mb-1">Weekly Meal Challenge 🥗</h3>
+              <h3 className="text-lg font-semibold dark:text-white  mb-1">Weekly Meal Challenge 🥗</h3>
               <ProgressBar value={weeklyProgressMeals} max={WEEKLY_MEAL_GOAL} color="emerald" />
               <p className="text-sm text-gray-600 mt-2">
                 {weeklyProgressMeals}/{WEEKLY_MEAL_GOAL} meals this week
@@ -359,13 +359,13 @@ const Challenges: React.FC = () => {
           <Card className="p-5">
             <h2 className="font-bold text-lg mb-4">Completed Challenges</h2>
             {completedChallenges.length === 0 ? (
-              <p>No challenges completed yet.</p>
+              <p className="dark:text-white">No challenges completed yet.</p>
             ) : (
               completedChallenges.map((c) => (
                 <div key={c.id} className="flex justify-between mb-2 border-b pb-1 text-sm">
                   <div>
                     <h3 className="font-semibold">{c.title}</h3>
-                    <p className="text-gray-500">{c.description}</p>
+                    <p className="text-gray-500 ">{c.description}</p>
                   </div>
                   <div className="text-gray-400">{c.completedDate} (+{c.points} pts)</div>
                 </div>
