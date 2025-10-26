@@ -6,8 +6,6 @@ import { FileText, BarChart2, Calendar, ChevronLeft, Shield } from "lucide-react
 import { auth } from "../firebaseConfig";
 import { CalendarIcon, HistoryIcon, PieChartIcon, ShieldAlertIcon } from "lucide-react";
 
-
-
 const reportCards = [
     {
         title: "7-Day Meal Plan (PDF)",
@@ -32,8 +30,7 @@ const reportCards = [
 const Reports: React.FC = () => {
     const navigate = useNavigate();
     const userEmail = auth.currentUser?.email;
-    const isAdmin = userEmail === "hasininimasha03@gmail.com";
-    // const isAdmin = userEmail === "admin@gmail.com";
+    const isAdmin = userEmail === "admin@gmail.com";
 
     return (
         <Layout>
@@ -77,7 +74,7 @@ const Reports: React.FC = () => {
                         whileHover={{ scale: 1.05 }}
                         className="cursor-pointer p-6 rounded-2xl text-white shadow-xl bg-emerald-500/70 backdrop-blur-lg border border-white/20 flex flex-col items-start space-y-3"
                     >
-                        <CalendarIcon size={32} className="opacity-90" />
+                        <CalendarIcon size={40} className="opacity-90" />
                         <h3 className="font-bold text-lg">7-Day Meal Plan</h3>
                         <p className="text-sm opacity-90">View & download weekly plan</p>
                     </motion.div>
@@ -88,7 +85,7 @@ const Reports: React.FC = () => {
                         onClick={() => navigate("/reports/meal-log")}
                         className="cursor-pointer p-6 rounded-2xl text-white shadow-xl bg-blue-500/70 backdrop-blur-lg border border-white/20 flex flex-col items-start space-y-3"
                     >
-                        <HistoryIcon size={32} className="opacity-90" />
+                        <HistoryIcon size={40} className="opacity-90" />
                         <h3 className="font-bold text-lg">Meal Log History</h3>
                         <p className="text-sm opacity-90">Track your logged meals</p>
                     </motion.div>
@@ -99,7 +96,7 @@ const Reports: React.FC = () => {
                         onClick={() => navigate("/reports/nutrition")}
                         className="cursor-pointer p-6 rounded-2xl text-white shadow-xl bg-purple-500/70 backdrop-blur-lg border border-white/20 flex flex-col items-start space-y-3"
                     >
-                        <PieChartIcon size={32} className="opacity-90" />
+                        <PieChartIcon size={40} className="opacity-90" />
                         <h3 className="font-bold text-lg">Nutrition Summary</h3>
                         <p className="text-sm opacity-90">View insights and charts</p>
                     </motion.div>
@@ -111,7 +108,7 @@ const Reports: React.FC = () => {
                             onClick={() => navigate("/reports/admin")}
                             className="cursor-pointer p-6 rounded-2xl text-white shadow-xl bg-red-500/70 backdrop-blur-lg border border-white/20 flex flex-col items-start space-y-3"
                         >
-                            <ShieldAlertIcon size={32} className="opacity-90" />
+                            <ShieldAlertIcon size={40} className="opacity-90" />
                             <h3 className="font-bold text-lg">Admin System Analytics</h3>
                             <p className="text-sm opacity-90">System-wide statistics</p>
                         </motion.div>
