@@ -18,6 +18,13 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     checkUserPlan();
+    
+    // Poll for plan changes every 2 seconds to auto-refresh when premium is cancelled/upgraded
+    const interval = setInterval(() => {
+      checkUserPlan();
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const checkUserPlan = async () => {

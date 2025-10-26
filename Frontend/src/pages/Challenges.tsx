@@ -7,6 +7,7 @@ import { LockIcon, StarIcon, CheckCircleIcon } from "lucide-react";
 import { db, auth } from "../firebaseConfig";
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import "../styles/Challenges.css";
+import { createChallengeNotification, createAchievementNotification } from '../services/notificationService';
 
 const WATER_GOAL_MALE = 15.5;
 const WATER_GOAL_FEMALE = 11.5;
@@ -138,11 +139,22 @@ const Challenges: React.FC = () => {
     const existingBadges = profileSnap.exists() ? profileSnap.data().badges || [] : [];
     if (!existingBadges.includes(badgeName)) {
       await updateDoc(profileRef, { badges: [...existingBadges, badgeName] });
+      
+      // Notify when badge is unlocked (only for new badges)
+      try {
+        await createAchievementNotification(
+          user.uid,
+          `Badge Unlocked: ${badgeName} 🏆`
+        );
+      } catch (error) {
+        console.error('Error creating badge unlock notification:', error);
+      }
     }
   };
 
   const addCompleted = async (title: string, description: string, pts: number, badgeToUnlock?: string) => {
     if (completedChallenges.find(c => c.title === title)) return;
+    if (!user) return;
 
     const completedDate = new Date().toDateString();
     setCompletedChallenges((prev) => [
@@ -151,6 +163,17 @@ const Challenges: React.FC = () => {
     ]);
 
     await addPoints(pts);
+
+    // Notify when challenge completed
+    try {
+      await createChallengeNotification(
+        user.uid,
+        `${title} Completed! 🎉`,
+        `${description} You earned ${pts} points!`
+      );
+    } catch (error) {
+      console.error('Error creating challenge completion notification:', error);
+    }
 
     if (badgeToUnlock) await unlockBadge(badgeToUnlock);
     else await unlockBadge("Fit Foodie Star");
@@ -172,13 +195,43 @@ const Challenges: React.FC = () => {
     let newWeeklyWater = weeklyData.waterDrank || 0;
     let newWeeklyMeals = weeklyData.mealsLogged || 0;
 
+    // Check if this is the first progress (starting a challenge)
+    const isFirstWaterLog = newCups === 0 && field === "waterIntake";
+    const isFirstMealLog = newMeals === 0 && field === "mealsLogged";
+
     if (field === "waterIntake") {
       newCups += 1;
       newWeeklyWater += 1;
+      
+      // Notify when starting hydration challenge
+      if (isFirstWaterLog) {
+        try {
+          await createChallengeNotification(
+            user.uid,
+            "Hydration Challenge",
+            "You've started your daily hydration challenge! Keep drinking water to reach your goal. 💧"
+          );
+        } catch (error) {
+          console.error('Error creating challenge start notification:', error);
+        }
+      }
     }
     if (field === "mealsLogged") {
       newMeals += 1;
       newWeeklyMeals += 1;
+      
+      // Notify when starting meal logging challenge
+      if (isFirstMealLog) {
+        try {
+          await createChallengeNotification(
+            user.uid,
+            "Meal Logging Challenge",
+            "You've started tracking your meals today! Log all 3 meals to complete the challenge. 🍽️"
+          );
+        } catch (error) {
+          console.error('Error creating challenge start notification:', error);
+        }
+      }
     }
 
     // Update Firebase
