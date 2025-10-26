@@ -172,3 +172,38 @@ export const generateMealPlan = async (req, res) => {
     return res.status(500).json({ error: err.message || "Meal plan generation failed." });
   }
 };
+
+// Analyze ingredients from meal description using Nutritionix API
+export const analyzeIngredients = async (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: "Missing query parameter." });
+    }
+
+    const url = "https://trackapi.nutritionix.com/v2/natural/nutrients";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-app-id": process.env.NUTRITIONIX_APP_ID,
+        "x-app-key": process.env.NUTRITIONIX_APP_KEY,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    const data = await response.json();
+    
+    if (!data.foods) {
+      return res.status(400).json({ error: "No ingredients found." });
+    }
+
+    // Return the foods with their details
+    res.json({ foods: data.foods });
+  } catch (err) {
+    console.error("Error analyzing ingredients:", err);
+    res.status(500).json({ error: "Failed to analyze ingredients." });
+  }
+};
