@@ -8,10 +8,46 @@ import { createNotification } from '../services/notificationService';
 const UpgradeToPremium: React.FC = () => {
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
 
   useEffect(() => {
     checkPremiumStatus();
   }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!isPremium || !expiryDate) {
+      setTimeRemaining('');
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = new Date();
+      const diff = expiryDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeRemaining('Expired');
+        checkPremiumStatus(); // Re-check status if expired
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+    };
+
+    // Update immediately
+    updateTimer();
+
+    // Update every second
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [isPremium, expiryDate]);
 
   const checkPremiumStatus = async () => {
     setLoading(true);
@@ -74,17 +110,21 @@ const UpgradeToPremium: React.FC = () => {
           } else {
             console.log('User plan: premium (valid until', expiresAt.toLocaleDateString(), ')');
             setIsPremium(true);
+            setExpiryDate(expiresAt);
           }
         } else {
           setIsPremium(userPlan === 'premium');
+          setExpiryDate(null);
           console.log('User plan:', userPlan);
         }
       } else {
         setIsPremium(false);
+        setExpiryDate(null);
       }
     } catch (error) {
       console.error('Error checking premium status:', error);
       setIsPremium(false);
+      setExpiryDate(null);
     }
     setLoading(false);
   };
@@ -136,6 +176,7 @@ const UpgradeToPremium: React.FC = () => {
       });
 
       setIsPremium(false);
+      setExpiryDate(null);
       alert('Premium subscription cancelled successfully. Your plan has been changed to Free.');
     } catch (error) {
       console.error('Error cancelling premium:', error);
@@ -154,14 +195,24 @@ const UpgradeToPremium: React.FC = () => {
   }
 
   return (
-    <Button 
-      size="sm" 
-      className="mt-3" 
-      onClick={isPremium ? handleCancel : handleUpgrade}
-      variant={isPremium ? "outline" : undefined}
-    >
-      {isPremium ? 'Cancel Premium' : 'Upgrade to Premium'}
-    </Button>
+    <div>
+      <Button 
+        size="sm" 
+        className="mt-3" 
+        onClick={isPremium ? handleCancel : handleUpgrade}
+        variant={isPremium ? "outline" : undefined}
+      >
+        {isPremium ? 'Cancel Premium' : 'Upgrade to Premium'}
+      </Button>
+      
+      {isPremium && timeRemaining && (
+        <div className="mt-2 text-sm">
+          <p className="text-gray-600 dark:text-gray-400">
+            Time remaining: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{timeRemaining}</span>
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 
