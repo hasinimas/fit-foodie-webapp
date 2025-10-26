@@ -26,6 +26,7 @@ import {
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore';
+import { createNotification } from '../services/notificationService';
 
 interface PantryItem {
   id: string;
@@ -73,6 +74,9 @@ const Pantry: React.FC = () => {
   category: '',
   checked: false,
 });
+
+  // Track which items we've already notified about
+  const [notifiedItems, setNotifiedItems] = useState<Set<string>>(new Set());
 
     // Nearby grocery stores states
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -159,6 +163,44 @@ const Pantry: React.FC = () => {
 
   const user = auth.currentUser;
 
+  // Check for expiring items and create notifications
+  const checkExpiringItems = async (items: PantryItem[], userId: string) => {
+    const now = new Date();
+    const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+    
+    for (const item of items) {
+      if (!item.expiryDate) continue;
+      
+      // Create unique key for this item's expiry notification
+      const notificationKey = `${item.id}-${item.expiryDate}`;
+      
+      // Skip if we've already notified about this item
+      if (notifiedItems.has(notificationKey)) continue;
+      
+      const expiryDate = new Date(item.expiryDate);
+      
+      // Check if item expires within 2 days
+      if (expiryDate > now && expiryDate <= twoDaysFromNow) {
+        const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        try {
+          // Create notification for expiring item
+          await createNotification({
+            userId,
+            title: 'Pantry Item Expiring Soon!',
+            message: `"${item.name}" will expire in ${daysLeft} day${daysLeft > 1 ? 's' : ''}. Use it soon!`,
+            type: 'reminder',
+          });
+          
+          // Mark this item as notified
+          setNotifiedItems(prev => new Set([...prev, notificationKey]));
+        } catch (error) {
+          console.error('Error creating expiry notification:', error);
+        }
+      }
+    }
+  };
+
   // Real-time listeners
   useEffect(() => {
     if (!user) return;
@@ -172,6 +214,9 @@ const Pantry: React.FC = () => {
         ...(doc.data() as PantryItem),
       }));
       setPantryItems(pantryData);
+      
+      // Check for items expiring within 2 days
+      checkExpiringItems(pantryData, user.uid);
     });
 
     const unsubscribeGrocery = onSnapshot(groceryRef, (snapshot) => {
