@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, addDoc, getDocs, query, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -169,6 +169,257 @@ const MealPlan: React.FC = () => {
     return Object.values(activePlan.meals).reduce((acc: number, m: any) => acc + (Number(m?.calories) || 0), 0);
   }, [activePlan]);
 
+  // Extract ingredients from meal plan and check against pantry
+  const checkIngredientsAndAddToGrocery = async (mealPlanDays: DayPlan[]) => {
+    try {
+      Swal.fire({
+        ...swalBase,
+        title: "Analyzing Ingredients...",
+        html: "Extracting ingredients from your meal plan...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+        showConfirmButton: false,
+      });
+
+      // Collect all meal descriptions
+      const allMealDescriptions: string[] = [];
+      mealPlanDays.forEach((day) => {
+        Object.values(day.meals).forEach((meal) => {
+          if (meal.description) {
+            allMealDescriptions.push(meal.description);
+          } else if (meal.title) {
+            allMealDescriptions.push(meal.title);
+          }
+        });
+      });
+
+      if (allMealDescriptions.length === 0) {
+        Swal.fire({
+          ...swalBase,
+          icon: "warning",
+          title: "No Meal Descriptions",
+          text: "Your meal plan doesn't have detailed descriptions to analyze.",
+        });
+        return;
+      }
+
+      // Use backend API to analyze and extract ingredients from meal descriptions
+      const ingredientsNeeded: { [key: string]: { quantity: number; category: string } } = {};
+      
+      for (const mealDesc of allMealDescriptions) {
+        try {
+          // Call backend API to analyze meal and get ingredients
+          const response = await fetch(`${API}/meals/analyze-ingredients`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: mealDesc }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Process the foods returned by Nutritionix
+            if (data.foods && Array.isArray(data.foods)) {
+              data.foods.forEach((food: any) => {
+                const foodName = food.food_name?.toLowerCase() || '';
+                const servingQty = food.serving_qty || 1;
+                
+                if (foodName) {
+                  // Determine category based on food tags or name
+                  let category = 'Other';
+                  const tags = food.tags || {};
+                  
+                  if (tags.item === 'Meat' || tags.item === 'Poultry' || tags.item === 'Fish' || 
+                      ['chicken', 'beef', 'pork', 'fish', 'salmon', 'tuna', 'lamb', 'turkey', 'egg'].some(m => foodName.includes(m))) {
+                    category = 'Protein';
+                  } else if (tags.item === 'Grains' || ['rice', 'bread', 'pasta', 'noodles', 'quinoa', 'oats', 'cereal'].some(g => foodName.includes(g))) {
+                    category = 'Grains';
+                  } else if (tags.item === 'Vegetable' || tags.item === 'Vegetables' ||
+                      ['tomato', 'lettuce', 'carrot', 'onion', 'garlic', 'pepper', 'broccoli', 'spinach', 'cucumber', 'potato'].some(v => foodName.includes(v))) {
+                    category = 'Vegetables';
+                  } else if (tags.item === 'Fruit' || tags.item === 'Fruits' ||
+                      ['apple', 'banana', 'orange', 'berry', 'mango', 'grape', 'lemon', 'strawberry'].some(f => foodName.includes(f))) {
+                    category = 'Fruits';
+                  } else if (tags.item === 'Dairy' || ['milk', 'cheese', 'yogurt', 'butter', 'cream'].some(d => foodName.includes(d))) {
+                    category = 'Dairy';
+                  }
+                  
+                  // Add or update ingredient
+                  if (!ingredientsNeeded[foodName]) {
+                    ingredientsNeeded[foodName] = { quantity: 0, category };
+                  }
+                  ingredientsNeeded[foodName].quantity += servingQty;
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error analyzing meal:', mealDesc, error);
+          // Continue with next meal even if one fails
+        }
+      }
+
+      // Helper function to normalize item names (handle singular/plural)
+      const normalizeItemName = (name: string): string => {
+        const normalized = name.toLowerCase().trim();
+        
+        // Remove common plural endings
+        if (normalized.endsWith('ies')) {
+          return normalized.slice(0, -3) + 'y'; // berries -> berry
+        } else if (normalized.endsWith('oes')) {
+          return normalized.slice(0, -2); // tomatoes -> tomato
+        } else if (normalized.endsWith('ses')) {
+          return normalized.slice(0, -2); // glasses -> glass
+        } else if (normalized.endsWith('s') && !normalized.endsWith('ss')) {
+          return normalized.slice(0, -1); // carrots -> carrot, eggs -> egg
+        }
+        
+        return normalized;
+      };
+
+      // Get pantry items
+      const pantryRef = collection(db, 'users', uid, 'pantry');
+      const pantrySnapshot = await getDocs(query(pantryRef));
+      const pantryItems: { [key: string]: number } = {};
+      const pantryItemsNormalized: { [key: string]: number } = {};
+      
+      pantrySnapshot.docs.forEach((doc) => {
+        const item = doc.data();
+        const itemName = (item.name || '').toLowerCase().trim();
+        if (itemName) {
+          pantryItems[itemName] = (item.quantity || 0);
+          // Also store normalized version
+          const normalized = normalizeItemName(itemName);
+          pantryItemsNormalized[normalized] = (pantryItemsNormalized[normalized] || 0) + (item.quantity || 0);
+        }
+      });
+
+      // Get existing grocery items to avoid duplicates
+      const groceryRef = collection(db, 'users', uid, 'grocery');
+      const grocerySnapshot = await getDocs(query(groceryRef));
+      const existingGroceryItems = new Set<string>();
+      
+      grocerySnapshot.docs.forEach((doc) => {
+        const item = doc.data();
+        const itemName = (item.name || '').toLowerCase().trim();
+        if (itemName) {
+          existingGroceryItems.add(itemName);
+        }
+      });
+
+      // Helper function to check if ingredient exists (handles partial matches and plurals)
+      const isIngredientAvailable = (ingredient: string): boolean => {
+        const ingredientLower = ingredient.toLowerCase().trim();
+        const ingredientNormalized = normalizeItemName(ingredientLower);
+        
+        // Check exact match in grocery list
+        if (existingGroceryItems.has(ingredientLower)) {
+          return true;
+        }
+        
+        // Check normalized form match
+        for (const groceryItem of existingGroceryItems) {
+          const groceryNormalized = normalizeItemName(groceryItem);
+          
+          // Match if normalized forms are the same
+          if (groceryNormalized === ingredientNormalized) {
+            return true;
+          }
+          
+          // Check if one contains the other
+          if (groceryItem.includes(ingredientLower) || ingredientLower.includes(groceryItem)) {
+            return true;
+          }
+          
+          // Check if normalized forms contain each other
+          if (groceryNormalized.includes(ingredientNormalized) || ingredientNormalized.includes(groceryNormalized)) {
+            return true;
+          }
+        }
+        
+        return false;
+      };
+
+      // Check which ingredients are missing or insufficient in pantry
+      const itemsToAdd: { name: string; category: string; quantity: number }[] = [];
+      
+      Object.entries(ingredientsNeeded).forEach(([ingredient, data]) => {
+        const ingredientLower = ingredient.toLowerCase().trim();
+        const ingredientNormalized = normalizeItemName(ingredientLower);
+        
+        // Check if available in pantry with sufficient quantity (check both exact and normalized)
+        const exactQty = pantryItems[ingredientLower] || 0;
+        const normalizedQty = pantryItemsNormalized[ingredientNormalized] || 0;
+        const availableQty = Math.max(exactQty, normalizedQty);
+        
+        const shortfall = data.quantity - availableQty;
+        
+        // Only add if:
+        // 1. There's a shortfall (need more than available in pantry)
+        // 2. Not already in grocery list
+        if (shortfall > 0 && !isIngredientAvailable(ingredientLower)) {
+          itemsToAdd.push({
+            name: ingredient.charAt(0).toUpperCase() + ingredient.slice(1),
+            category: data.category,
+            quantity: Math.ceil(shortfall),
+          });
+        }
+      });
+
+      // Add missing items to grocery list
+      if (itemsToAdd.length > 0) {
+        const addPromises = itemsToAdd.map((item) =>
+          addDoc(collection(db, 'users', uid, 'grocery'), {
+            name: item.name,
+            category: item.category,
+            checked: false,
+            createdAt: serverTimestamp(),
+          })
+        );
+        
+        await Promise.all(addPromises);
+        
+        const totalIngredients = Object.keys(ingredientsNeeded).length;
+        const alreadyAvailable = totalIngredients - itemsToAdd.length;
+        
+        let message = `Added <b>${itemsToAdd.length}</b> new item(s) to your grocery list.`;
+        if (alreadyAvailable > 0) {
+          message += `<br><br><b>${alreadyAvailable}</b> item(s) already available in pantry or grocery list.`;
+        }
+        message += `<br><br>Check the Pantry page to view them.`;
+        
+        await Swal.fire({
+          ...swalBase,
+          icon: "info",
+          title: "🛒 Grocery List Updated!",
+          html: message,
+          confirmButtonColor: "#10B981",
+        });
+      } else {
+        const totalIngredients = Object.keys(ingredientsNeeded).length;
+        
+        await Swal.fire({
+          ...swalBase,
+          icon: "success",
+          title: "✅ All Set!",
+          html: totalIngredients > 0 
+            ? `All <b>${totalIngredients}</b> ingredients are already in your pantry or grocery list!`
+            : "No ingredients found in meal descriptions.",
+          confirmButtonColor: "#10B981",
+        });
+      }
+    } catch (error) {
+      console.error('Error checking ingredients:', error);
+      await Swal.fire({
+        ...swalBase,
+        icon: "error",
+        title: "Error",
+        text: "Failed to analyze ingredients. Please try again.",
+        confirmButtonColor: "#EF4444",
+      });
+    }
+  };
+
   // fetch/generate plan from backend (used as fallback or regenerate)
   const fetchPlan = async (showSwal = true) => {
     try {
@@ -217,13 +468,16 @@ const MealPlan: React.FC = () => {
       });
       await setDoc(doc(db, "users", uid, "mealData", "mealPlan"), { days });
 
-      Swal.fire({
+      await Swal.fire({
         ...swalBase,
         icon: "success",
         title: "✅ AI Meal Plan Generated!",
         text: data.message || "Your weekly plan is ready.",
         confirmButtonColor: "#10B981",
       });
+
+      // Check ingredients and add missing items to grocery list
+      await checkIngredientsAndAddToGrocery(days);
     } catch (err: any) {
       console.error("generate error", err);
       Swal.fire({ ...swalBase, icon: "error", title: "Network error", text: err?.message || "Something went wrong." });
@@ -287,12 +541,21 @@ const MealPlan: React.FC = () => {
               Regenerate Plan
             </Button>
             <Button
-              onClick={() =>
-                Swal.fire({ ...swalBase, icon: "success", title: "Added to Pantry", text: "All ingredients added to your pantry list.", timer: 1200, showConfirmButton: false })
-              }
+              onClick={async () => {
+                if (!plan || plan.length === 0) {
+                  Swal.fire({ 
+                    ...swalBase, 
+                    icon: "warning", 
+                    title: "No Meal Plan", 
+                    text: "Please generate a meal plan first." 
+                  });
+                  return;
+                }
+                await checkIngredientsAndAddToGrocery(plan);
+              }}
             >
               <ShoppingBagIcon size={16} className="mr-2" />
-              Add All to Pantry
+              Check Pantry & Add to Grocery
             </Button>
           </div>
         </div>
