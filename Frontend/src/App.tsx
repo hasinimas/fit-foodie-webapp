@@ -53,7 +53,7 @@ export function App() {
   }
 
   return (
-    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <Router>
       <ThemeProvider>
         <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
           <Routes>
