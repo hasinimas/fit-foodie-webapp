@@ -196,12 +196,36 @@ const Layout: React.FC<LayoutProps> = ({
         </div>
         <nav className="nav-list">
           <ul className="space-y-1">
-            {navItems.map(item => <li key={item.path} className="nav-item">
-                <Link to={item.path} className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}>
-                  <span className="nav-icon">{item.icon}</span>
-                  {item.label}
-                </Link>
-              </li>)}
+            {navItems.map(item => {
+  const isPantry = item.path === "/pantry";
+  const isLocked = isPantry && userPlan === "Free";
+
+  return (
+    <li
+      key={item.path}
+      className={`nav-item ${isLocked ? "opacity-50 cursor-not-allowed" : ""}`}
+    >
+      {isLocked ? (
+        <div
+          className="nav-link flex items-center"
+          title="Available only for Premium users"
+        >
+          <span className="nav-icon">{item.icon}</span>
+          {item.label} 🔒
+        </div>
+      ) : (
+        <Link
+          to={item.path}
+          className={`nav-link ${location.pathname === item.path ? "active" : ""}`}
+        >
+          <span className="nav-icon">{item.icon}</span>
+          {item.label}
+        </Link>
+      )}
+    </li>
+  );
+})}
+
           </ul>
         </nav>
         <div className="user-profile">
