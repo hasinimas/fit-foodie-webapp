@@ -158,25 +158,30 @@ const LogMeal: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white ">Log Meal</h1>
+      <div className="min-h-screen flex items-start justify-center py-10 px-4 bg-gradient-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div className="w-full max-w-6xl bg-white/70 dark:bg-gray-900/60 rounded-3xl shadow-2xl border border-gray-200/60 backdrop-blur-md p-8 min-h-[600px]">
+        {/* Main Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Log Meal</h1>
           <p className="text-sm text-gray-500">Tip: be detailed for accurate analysis</p>
         </div>
 
         {/* toast */}
-        <div className="mb-4">{toast && <Toast kind={toast.kind} text={toast.text} onClose={() => setToast(null)} />}</div>
+        <div className="mb-6">{toast && <Toast kind={toast.kind} text={toast.text} onClose={() => setToast(null)} />}</div>
 
-        {/* grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* left - input */}
-          <Card>
-            <div className="flex justify-between items-start mb-3">
-              <h2 className="font-semibold text-gray-800">Describe your meal</h2>
-              <div className="text-xs text-gray-500">Meal type & time</div>
+        {/* Two Part Container */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* LEFT SECTION: Describe your meal */}
+          <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-gray-800/50 dark:to-gray-700/50 rounded-2xl p-6 border border-blue-100 dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-blue-200 dark:border-gray-600">
+              <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white text-xl">
+                🍽️
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white">Describe Your Meal</h2>
             </div>
-
+            
+            <Card>
             <textarea
               value={mealText}
               onChange={(e) => setMealText(e.target.value)}
@@ -185,61 +190,73 @@ const LogMeal: React.FC = () => {
               className="w-full p-4 rounded-2xl border border-gray-200 bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
             />
 
-            <div className="flex items-center gap-3 mt-4">
-
-              {/* Modern Glass Select */}
+            {/* Meal Type Selector */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Meal Type</label>
               <select
                 value={mealType}
                 onChange={(e) => setMealType(e.target.value as any)}
-                className="px-4 py-2 rounded-xl bg-orange-100 backdrop-blur-md border border-orange-300 shadow-sm hover:shadow-md transition text-sm outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 cursor-pointer"
+                className="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 shadow-sm hover:shadow-md transition-all text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 cursor-pointer"
               >
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-                <option value="snack">Snack</option>
+                <option value="breakfast">🌅 Breakfast</option>
+                <option value="lunch">☀️ Lunch</option>
+                <option value="dinner">🌙 Dinner</option>
+                <option value="snack">🍎 Snack</option>
               </select>
+            </div>
 
-              {/* Save Draft Button */}
-              <Button
-                onClick={handleSaveDraft}
-                icon={<SendIcon size={14} />}
-                disabled={busy}
-                className="shadow-sm hover:shadow-lg transition bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4"
-              >
-                {busy ? "Saving..." : "Save Draft"}
-              </Button>
-
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
               {/* Voice Button */}
               <button
                 onClick={toggleVoice}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm shadow-sm hover:shadow-lg transition backdrop-blur-md border ${isRecording
-                    ? "bg-red-200/50 border-red-400 text-red-700"
-                    : "bg-blue-100 border-blue-400 hover:bg-blue-300"
-                  }`}
+                disabled={busy}
+                className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 ${isRecording
+                    ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+                    : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
+                  } ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                <MicIcon size={16} className="opacity-80" /> <span>{isRecording ? "Listening..." : "Voice"}</span>
+                <MicIcon size={18} />
+                <span>{isRecording ? "Listening..." : "Voice Input"}</span>
+              </button>
+
+              {/* Save Draft Button */}
+              <button
+                onClick={handleSaveDraft}
+                disabled={busy}
+                className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <SendIcon size={18} />
+                <span>{busy ? "Saving..." : "Save Meal"}</span>
               </button>
 
               {/* Analyze Button */}
-              <Button
-                variant="outline"
+              <button
                 onClick={handleAnalyze}
-                icon={<BarChart3Icon size={14} />}
                 disabled={busy}
-                className="shadow-sm bg-green-600 hover:shadow-lg transition rounded-xl px-4"
+                className={`col-span-2 flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                Analyze Day
-              </Button>
+                <BarChart3Icon size={18} />
+                <span>Analyze My Day</span>
+              </button>
             </div>
-          </Card>
+            </Card>
+          </div>
 
-          {/* right - analysis */}
+          {/* RIGHT SECTION: Nutrition Analysis */}
+          <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-gray-800/50 dark:to-gray-700/50 rounded-2xl p-6 border border-emerald-100 dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-emerald-200 dark:border-gray-600">
+              <div className="h-10 w-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white text-xl">
+                📊
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white">Nutrition Analysis</h2>
+            </div>
+
           <Card>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800 dark:text-white">Nutrition Analysis</h3>
               <div className="flex items-center gap-3">
-                <button onClick={() => { setAnalysis(null); setMealText(""); }} className="text-xs text-gray-500">Clear</button>
-                <button onClick={() => setAnalysis(null)} className="text-xs text-gray-500">Reset</button>
+                <button onClick={() => { setAnalysis(null); setMealText(""); }} className="text-xs text-gray-500 hover:text-gray-700">Clear</button>
+                <button onClick={() => setAnalysis(null)} className="text-xs text-gray-500 hover:text-gray-700">Reset</button>
               </div>
             </div>
 
@@ -280,8 +297,10 @@ const LogMeal: React.FC = () => {
               </div>
             )}
           </Card>
+          </div>
         </div>
       </div>
+    </div>
     </Layout>
   );
 };
