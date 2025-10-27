@@ -3,17 +3,10 @@ import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import {
-  ShoppingBagIcon,
   PlusIcon,
   XIcon,
   CheckIcon,
   SearchIcon,
-  ChevronDownIcon,
-  FlameIcon,
-  TimerIcon,
-  CakeIcon,
-  AppleIcon,
-  CoffeeIcon,
   LockIcon,
 } from 'lucide-react';
 import '../styles/Pantry.css';
@@ -47,26 +40,16 @@ interface GroceryItem {
   checked: boolean;
 }
 
-interface RecipeCard {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  calories: number;
-  time: string;
-  color: string;
-  icon: React.ReactNode;
-  mainIngredients: string[];
-}
-
 const Pantry: React.FC = () => {
   const navigate = useNavigate();
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'grocery' | 'pantry' | 'recipes'>('grocery');
+  const [activeTab, setActiveTab] = useState<'grocery' | 'pantry' | 'stores'>('grocery');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [showPantryDialog, setShowPantryDialog] = useState(false);
+  const [selectedGroceryItem, setSelectedGroceryItem] = useState<GroceryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newItem, setNewItem] = useState({
     name: '',
@@ -90,10 +73,6 @@ const Pantry: React.FC = () => {
       { id: number; name: string; distance: number; description: string; lat: number; lng: number }[]
     >([]);
     const [loadingStores, setLoadingStores] = useState(false);
-
-    // Grocery stores near Colombo (example dataset)
-   // Will fetch from OpenStreetMap (Nominatim)
-  const [storeList, setStoreList] = useState<any[]>([]);
 
   // Check if user is premium
   useEffect(() => {
@@ -299,6 +278,67 @@ const Pantry: React.FC = () => {
   }
 };
 
+  /* Handle grocery item checkbox - ask if user wants to add to pantry */
+  const handleGroceryCheckbox = async (item: GroceryItem) => {
+    if (!user) return;
+
+    // If checking (marking as purchased), ask to add to pantry
+    if (!item.checked) {
+      setSelectedGroceryItem(item);
+      setShowPantryDialog(true);
+    } else {
+      // If unchecking, just update the checkbox
+      const itemRef = doc(db, 'users', user.uid, 'grocery', item.id);
+      await updateDoc(itemRef, { checked: false });
+    }
+  };
+
+  /* Add grocery item to pantry and remove from grocery list */
+  const handleAddToPantry = async () => {
+    if (!user || !selectedGroceryItem) return;
+
+    try {
+      // Add to pantry with default values
+      const today = new Date();
+      const defaultExpiryDate = new Date(today.setDate(today.getDate() + 7)); // 7 days from now
+      const expiryDateString = defaultExpiryDate.toISOString().split('T')[0];
+      
+      await addDoc(collection(db, 'users', user.uid, 'pantry'), {
+        name: selectedGroceryItem.name,
+        category: selectedGroceryItem.category,
+        quantity: 1,
+        expiryDate: expiryDateString,
+        expiresIn: '1 week',
+        createdAt: serverTimestamp(),
+      });
+
+      // Delete from grocery list
+      await deleteDoc(doc(db, 'users', user.uid, 'grocery', selectedGroceryItem.id));
+
+      setShowPantryDialog(false);
+      setSelectedGroceryItem(null);
+    } catch (err) {
+      console.error('Failed to add to pantry:', err);
+      alert('Failed to add item to pantry.');
+    }
+  };
+
+  /* Just mark as purchased without adding to pantry */
+  const handleMarkPurchasedOnly = async () => {
+    if (!user || !selectedGroceryItem) return;
+
+    try {
+      // Delete from grocery list
+      await deleteDoc(doc(db, 'users', user.uid, 'grocery', selectedGroceryItem.id));
+      
+      setShowPantryDialog(false);
+      setSelectedGroceryItem(null);
+    } catch (err) {
+      console.error('Failed to remove item:', err);
+      alert('Failed to remove item from grocery list.');
+    }
+  };
+
 
   const handleAddItem = async () => {
     if (!user) return;
@@ -391,43 +431,6 @@ const Pantry: React.FC = () => {
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Dummy recipe suggestions (can be dynamic later)
-  const recipeCards: RecipeCard[] = [
-    {
-      id: 1,
-      title: 'Banana Oatmeal Breakfast',
-      description: 'A nutritious breakfast using oats, banana, and optional egg.',
-      status: 'All ingredients available',
-      calories: 310,
-      time: '15 min',
-      color: 'amber',
-      icon: <CakeIcon size={24} className="text-amber-600" />,
-      mainIngredients: ['Oats', 'Banana', 'Egg'],
-    },
-    {
-      id: 2,
-      title: 'Apple & PB Energy Bites',
-      description: 'Quick energy snack combining apples, peanut butter, and oats.',
-      status: 'All ingredients available',
-      calories: 180,
-      time: '10 min',
-      color: 'emerald',
-      icon: <AppleIcon size={24} className="text-emerald-600" />,
-      mainIngredients: ['Apple', 'Peanut Butter', 'Oats'],
-    },
-    {
-      id: 3,
-      title: 'Oatmeal Protein Pancakes',
-      description: 'High-protein breakfast pancakes using oats, eggs, and banana.',
-      status: 'Missing 1 ingredient',
-      calories: 320,
-      time: '20 min',
-      color: 'purple',
-      icon: <CoffeeIcon size={24} className="text-purple-600 " />,
-      mainIngredients: ['Oats', 'Eggs', 'Banana'],
-    },
-  ];
-
   return (
     <Layout>
       {loading ? (
@@ -499,8 +502,8 @@ const Pantry: React.FC = () => {
           <button className={`tab-button ${activeTab === 'pantry' ? 'active' : ''}`} onClick={() => setActiveTab('pantry')}>
             My Pantry
           </button>
-          <button className={`tab-button ${activeTab === 'recipes' ? 'active' : ''}`} onClick={() => setActiveTab('recipes')}>
-            Recipe Suggestions
+          <button className={`tab-button ${activeTab === 'stores' ? 'active' : ''}`} onClick={() => setActiveTab('stores')}>
+            Nearby Stores
           </button>
         </div>
 
@@ -555,10 +558,7 @@ const Pantry: React.FC = () => {
                           <input
                             type="checkbox"
                             checked={item.checked}
-                            onChange={async () => {
-                              const itemRef = doc(db, 'users', user.uid, 'grocery', item.id);
-                              await updateDoc(itemRef, { checked: !item.checked });
-                            }}
+                            onChange={() => handleGroceryCheckbox(item)}
                           />
                         </td>
                         <td>
@@ -574,59 +574,6 @@ const Pantry: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
-              </div>
-
-              {/* 🗺️ Nearby Grocery Stores Section */}
-    
-              <div className="mt-8">
-                <h2 className="grocery-title mb-3">Nearby Grocery Stores</h2>
-
-                {loadingStores ? (
-                  <p>Fetching nearby stores...</p>
-                ) : nearbyStores.length > 0 ? (
-                  <div className="grocery-options mt-4">
-                    {nearbyStores.map((store) => (
-                      <div key={store.id} className="grocery-option">
-                        <div className="grocery-option-header">
-                          <h3 className="grocery-option-title">{store.name}</h3>
-                          <span
-                            className={`distance-badge ${
-                              store.distance < 1
-                                ? 'distance-close'
-                                : store.distance < 3
-                                ? 'distance-medium'
-                                : 'distance-far'
-                            }`}
-                          >
-                            {store.distance.toFixed(1)} km away
-                          </span>
-                        </div>
-                        <p className="grocery-option-description">{store.description}</p>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            fullWidth
-                            onClick={() => {
-                              if (!userLocation) {
-                                alert("Location not available");
-                                return;
-                              }
-                              // Create a free Google Maps directions link
-                              const directionsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}/@${store.lat},${store.lng},15z`;
-                              window.open(directionsUrl, "_blank");
-                            }}
-                          >
-                            View Store Directions
-                          </Button>
-
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 mt-3">
-                    Please enable location access to find nearby stores.
-                  </p>
-                )}
               </div>
                       </Card>
           )}
@@ -688,48 +635,57 @@ const Pantry: React.FC = () => {
           </Card>
         )}
 
-        {/* -------- Recipes Tab -------- */}
-        {activeTab === 'recipes' && (
+        {/* -------- Nearby Stores Tab -------- */}
+        {activeTab === 'stores' && (
           <Card>
-            <h2 className="grocery-title mb-4">Recipe Suggestions</h2>
-            <div className="recipe-grid">
-              {recipeCards.map((recipe) => (
-                <div key={recipe.id} className={`recipe-card border-${recipe.color}-200`}>
-                  <div className={`recipe-header bg-gradient-to-br from-${recipe.color}-100 to-${recipe.color}-200`}>
-                    <div className={`recipe-icon-container bg-${recipe.color}-50`}>{recipe.icon}</div>
-                    <div className="recipe-info">
-                      <h3 className="recipe-title">{recipe.title}</h3>
-                      <div className="recipe-meta">
-                        <span className="recipe-meta-item">
-                          <FlameIcon size={14} className="recipe-meta-icon" />
-                          {recipe.calories} cal
-                        </span>
-                        <span className="recipe-meta-item">
-                          <TimerIcon size={14} className="recipe-meta-icon" />
-                          {recipe.time}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="recipe-content">
-                    <div className="recipe-ingredients">
-                      {recipe.mainIngredients.map((ing, idx) => (
-                        <span key={idx} className={`recipe-ingredient bg-${recipe.color}-50 text-${recipe.color}-700`}>
-                          {ing}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="recipe-description">{recipe.description}</p>
-                    <div className="recipe-footer">
-                      <span className={`recipe-status ${recipe.status.includes('All') ? 'status-available' : 'status-missing'}`}>
-                        {recipe.status}
+            <h2 className="grocery-title mb-3">Nearby Grocery Stores</h2>
+
+            {loadingStores ? (
+              <p>Fetching nearby stores...</p>
+            ) : nearbyStores.length > 0 ? (
+              <div className="grocery-options mt-4">
+                {nearbyStores.map((store) => (
+                  <div key={store.id} className="grocery-option">
+                    <div className="grocery-option-header">
+                      <h3 className="grocery-option-title">{store.name}</h3>
+                      <span
+                        className={`distance-badge ${
+                          store.distance < 1
+                            ? 'distance-close'
+                            : store.distance < 3
+                            ? 'distance-medium'
+                            : 'distance-far'
+                        }`}
+                      >
+                        {store.distance.toFixed(1)} km away
                       </span>
-                      <Button size="sm" variant="outline">View Recipe</Button>
                     </div>
+                    <p className="grocery-option-description">{store.description}</p>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        fullWidth
+                        onClick={() => {
+                          if (!userLocation) {
+                            alert("Location not available");
+                            return;
+                          }
+                          // Create a free Google Maps directions link
+                          const directionsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}/@${store.lat},${store.lng},15z`;
+                          window.open(directionsUrl, "_blank");
+                        }}
+                      >
+                        View Store Directions
+                      </Button>
+
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 mt-3">
+                Please enable location access to find nearby stores.
+              </p>
+            )}
           </Card>
         )}
 
@@ -787,6 +743,38 @@ const Pantry: React.FC = () => {
                 <div className="popup-actions">
                   <Button onClick={handleAddItem} icon={<CheckIcon size={16} />}>Save Item</Button>
                   <Button variant="outline" onClick={() => setShowPopup(false)} icon={<XIcon size={16} />}>Cancel</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* -------- Add to Pantry Dialog -------- */}
+        {showPantryDialog && selectedGroceryItem && (
+          <div className="popup-overlay">
+            <div className="popup-container enhanced-popup" style={{ maxWidth: '400px' }}>
+              <h2 className="popup-title">📦 Item Purchased</h2>
+              <div className="popup-form">
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  You purchased <strong>{selectedGroceryItem.name}</strong>.
+                </p>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Would you like to add this item to your pantry?
+                </p>
+                <div className="popup-actions">
+                  <Button 
+                    onClick={handleAddToPantry} 
+                    icon={<CheckIcon size={16} />}
+                    className="bg-green-500 hover:bg-green-600"
+                  >
+                    Yes, Add to Pantry
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleMarkPurchasedOnly}
+                  >
+                    No, Just Remove
+                  </Button>
                 </div>
               </div>
             </div>
