@@ -14,7 +14,7 @@ const API = (import.meta as any).env?.VITE_API_URL || "http://localhost:5000/api
 const Toast = ({ kind, text, onClose }: { kind: "success" | "warning" | "error"; text: string; onClose?: () => void }) => {
   const bg = kind === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-800"
     : kind === "warning" ? "bg-amber-50 border-amber-200 text-amber-800"
-    : "bg-red-50 border-red-200 text-red-800";
+      : "bg-red-50 border-red-200 text-red-800";
   return (
     <div className={`${bg} border p-3 rounded-xl shadow-sm flex items-start gap-3`}>
       <div className="flex-1 text-sm">{text}</div>
@@ -47,7 +47,7 @@ const LogMeal: React.FC = () => {
     };
     r.onerror = () => setIsRecording(false);
     recognitionRef.current = r;
-    return () => { try { recognitionRef.current?.stop(); } catch {} };
+    return () => { try { recognitionRef.current?.stop(); } catch { } };
   }, []);
 
   useEffect(() => {
@@ -87,14 +87,14 @@ const LogMeal: React.FC = () => {
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "Failed");
       setToast({ kind: "success", text: j.message || `${mealType} saved.` });
-      
+
       // Create notification for meal logged
       try {
         await createMealLoggedNotification(user.uid, mealText, j.calories || 0);
       } catch (notifError) {
         console.error('Error creating notification:', notifError);
       }
-      
+
       setMealText("");
     } catch (e) {
       console.error(e);
@@ -186,22 +186,48 @@ const LogMeal: React.FC = () => {
             />
 
             <div className="flex items-center gap-3 mt-4">
-              <select value={mealType} onChange={(e) => setMealType(e.target.value as any)} className="p-2 rounded-lg border">
+
+              {/* Modern Glass Select */}
+              <select
+                value={mealType}
+                onChange={(e) => setMealType(e.target.value as any)}
+                className="px-4 py-2 rounded-xl bg-orange-100 backdrop-blur-md border border-orange-300 shadow-sm hover:shadow-md transition text-sm outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 cursor-pointer"
+              >
                 <option value="breakfast">Breakfast</option>
                 <option value="lunch">Lunch</option>
                 <option value="dinner">Dinner</option>
                 <option value="snack">Snack</option>
               </select>
 
-              <Button onClick={handleSaveDraft} icon={<SendIcon size={14} />} disabled={busy}>
+              {/* Save Draft Button */}
+              <Button
+                onClick={handleSaveDraft}
+                icon={<SendIcon size={14} />}
+                disabled={busy}
+                className="shadow-sm hover:shadow-lg transition bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4"
+              >
                 {busy ? "Saving..." : "Save Draft"}
               </Button>
 
-              <button onClick={toggleVoice} className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${isRecording ? "bg-red-50 text-red-600" : "bg-white"}`}>
-                <MicIcon /> <span className="text-sm">{isRecording ? "Listening..." : "Voice"}</span>
+              {/* Voice Button */}
+              <button
+                onClick={toggleVoice}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm shadow-sm hover:shadow-lg transition backdrop-blur-md border ${isRecording
+                    ? "bg-red-200/50 border-red-400 text-red-700"
+                    : "bg-blue-100 border-blue-400 hover:bg-blue-300"
+                  }`}
+              >
+                <MicIcon size={16} className="opacity-80" /> <span>{isRecording ? "Listening..." : "Voice"}</span>
               </button>
 
-              <Button variant="outline" onClick={handleAnalyze} icon={<BarChart3Icon size={14} />} disabled={busy}>
+              {/* Analyze Button */}
+              <Button
+                variant="outline"
+                onClick={handleAnalyze}
+                icon={<BarChart3Icon size={14} />}
+                disabled={busy}
+                className="shadow-sm bg-green-600 hover:shadow-lg transition rounded-xl px-4"
+              >
                 Analyze Day
               </Button>
             </div>
