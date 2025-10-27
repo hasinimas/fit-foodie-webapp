@@ -169,6 +169,13 @@ const MealPlan: React.FC = () => {
     return Object.values(activePlan.meals).reduce((acc: number, m: any) => acc + (Number(m?.calories) || 0), 0);
   }, [activePlan]);
 
+  //total protein helper
+  const activePlanProtein  = plan[activeDay] ?? null;
+  const totalProteinForDay = useMemo(() => {
+    if (!activePlan) return 0;
+    return Object.values(activePlan.meals).reduce((acc: number, m: any) => acc + (Number(m?.protein) || 0), 0);
+  }, [activePlan]);
+
   // Extract ingredients from meal plan and check against pantry
   const checkIngredientsAndAddToGrocery = async (mealPlanDays: DayPlan[]) => {
     try {
@@ -471,7 +478,7 @@ const MealPlan: React.FC = () => {
       await Swal.fire({
         ...swalBase,
         icon: "success",
-        title: "✅ AI Meal Plan Generated!",
+        title: "AI Meal Plan Generated!",
         text: data.message || "Your weekly plan is ready.",
         confirmButtonColor: "#10B981",
       });
@@ -511,18 +518,19 @@ const MealPlan: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-6 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center mb-6">
           <button onClick={() => navigate(-1)} className="flex items-center text-gray-600 hover:text-gray-800 mr-4">
             <ChevronLeftIcon size={20} />
-            <span className="ml-2">Back</span>
+            <span className="ml-3">Back</span>
           </button>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white ">Your 7-Day Meal Plan</h1>
 
-          <div className="ml-auto flex items-center space-x-3">
+          <div className="ml-auto flex items-center space-x-5">
             <Button
-              variant="ghost"
+              size="lg"
+              className="bg-blue-300 text-emerald-600 hover:bg-blue-700"
               onClick={() =>
                 Swal.fire({
                   ...swalBase,
@@ -541,6 +549,8 @@ const MealPlan: React.FC = () => {
               Regenerate Plan
             </Button>
             <Button
+              size="lg"
+              className="bg-purple-400 hover:bg-purple-600 text-white"
               onClick={async () => {
                 if (!plan || plan.length === 0) {
                   Swal.fire({ 
@@ -554,14 +564,14 @@ const MealPlan: React.FC = () => {
                 await checkIngredientsAndAddToGrocery(plan);
               }}
             >
-              <ShoppingBagIcon size={16} className="mr-2" />
+              <ShoppingBagIcon size={18} className="mr-2" />
               Check Pantry & Add to Grocery
             </Button>
           </div>
         </div>
 
         {/* Day selector */}
-        <div className="mb-6 overflow-x-auto">
+        <div className="mb-8 overflow-x-auto">
 
           <div className="inline-flex space-x-3">
             {(plan.length ? plan.map((p) => p.day) : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]).map((label, idx) => {
@@ -575,10 +585,10 @@ const MealPlan: React.FC = () => {
                   key={`${label}-${idx}`}
                   onClick={() => setActiveDay(idx)}
                   whileHover={{ y: -3 }}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-shadow shadow-sm ${isActive ? "bg-emerald-500 text-white ring-4 ring-emerald-100" : "bg-white text-gray-700 hover:bg-gray-50"
+                  className={`px-8 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-shadow shadow-sm ${isActive ? "bg-emerald-300 text-white ring-emerald-100" : "bg-white text-white-700 hover:bg-gray-50"
                     }`}
                 >
-                  <div className="text-xs opacity-80">{weekday}</div>
+                  <div className="text-sm opacity-80">{weekday}</div>
                   <div className="mt-1">{label}</div>
                 </motion.button>
               );
@@ -601,6 +611,7 @@ const MealPlan: React.FC = () => {
 
             </div>
             <div className="text-sm text-gray-600">Total: ~{totalCaloriesForDay || 0} calories</div>
+            <div className="text-sm text-gray-600">Protein: ~{totalProteinForDay || 0} g</div>
           </div>
 
 
@@ -706,38 +717,18 @@ const MealPlan: React.FC = () => {
                     <span className="text-gray-600">Calories</span>
                     <span className="text-gray-800">{totalCaloriesForDay} / 2100 kcal</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${Math.min(100, (totalCaloriesForDay / 2100) * 100)}%` }} />
+                  <div className="w-full bg-gray-200 rounded-full h-5">
+                    <div className="bg-emerald-400 h-5 rounded-full" style={{ width: `${Math.min(100, (totalCaloriesForDay / 2100) * 100)}%` }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-600">Protein</span>
-                    <span className="text-gray-800">— / 90 g</span>
+                    <span className="text-gray-800">{totalProteinForDay} / 150 g</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full" style={{ width: `40%` }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Carbs</span>
-                    <span className="text-gray-800">— / 260 g</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full" style={{ width: `60%` }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Fats</span>
-                    <span className="text-gray-800">— / 70 g</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full" style={{ width: `30%` }} />
+                  <div className="w-full bg-gray-200 rounded-full h-5">
+                    <div className="bg-orange-400 h-5 rounded-full" style={{ width: `${Math.min(100, (totalProteinForDay / 150) * 100)}%` }} />
                   </div>
                 </div>
               </div>

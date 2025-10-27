@@ -52,17 +52,17 @@ const Features: React.FC = () => {
                 <li className="flex items-start">
                   <CheckIcon size={18} className="text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-600">
-                    Photo recognition for quick logging
+                    Voice recognition for quick logging
                   </span>
                 </li>
                 <li className="flex items-start">
                   <CheckIcon size={18} className="text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-600">Voice input support</span>
+                  <span className="text-gray-600">Detailed nutritional breakdown</span>
                 </li>
                 <li className="flex items-start">
                   <CheckIcon size={18} className="text-emerald-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-600">
-                    Detailed nutritional breakdown
+                    Meal history records
                   </span>
                 </li>
               </ul>
