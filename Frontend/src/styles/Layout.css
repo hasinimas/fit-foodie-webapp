@@ -189,7 +189,7 @@
 /* --- SIDEBAR STYLES --- */
 .sidebar {
   width: 250px;
-  background: linear-gradient(180deg, #f8fafc, #e0f2fe);
+  background: linear-gradient(180deg, #f8fafc, #b0ebf8, #8df0eb);
   padding: 1rem 0.75rem;
   display: flex;
   flex-direction: column;

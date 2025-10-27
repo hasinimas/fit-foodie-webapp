@@ -7,7 +7,7 @@ import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import MoodTracker from '../components/MoodTracker';
 import {
-  UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon,
+  UtensilsIcon, CalendarIcon, TrophyIcon, PlusIcon, ChevronRightIcon,Beef, Wheat, Droplet,
   HeartIcon, ActivityIcon, BarChart3Icon, TrendingUpIcon, DropletIcon, BrainIcon, StarIcon 
 } from 'lucide-react';
 // @ts-ignore
@@ -336,14 +336,15 @@ useEffect(() => {
         </div>
 
         {/* Nutrition Summary - Weekly Totals */}
-          <div className="dashboard-grid">
-            <Card className="col-span-1 md:col-span-1">
+          <div className="dashboard-grid p-4 rounded-lg border-l-4 border-transparent
+              transition-all duration-300 backdrop-blur-md overflow-hidden hover:shadow-md hover:bg-blue-100 dark:hover:bg-blue-600">
+            <Card className="col-span-1 md:col-span-3">
               <h2 className="nutrition-card-title">Weekly Nutrition Totals</h2>
               <div className="nutrition-stats">
-                <div className="stat-card stat-card-primary">
+                <div className="stat-card stat-card-primary min-h-[110px] bg-yellow-100 dark:bg-yellow-100/20">
                   <div className="stat-icon-container stat-icon-primary">
-                    <ActivityIcon size={28} className="text-emerald-500" />
-                  </div>
+                    <ActivityIcon size={28} className="text-orange-500" />
+                  </div>  
                   <div>
                     <p className="stat-label">Calories</p>
                     <p className="stat-value">{weeklyTotals.calories} kcal</p>
@@ -351,7 +352,7 @@ useEffect(() => {
                 </div>
                 <div className="stat-card stat-card-secondary">
                   <div className="stat-icon-container stat-icon-secondary">
-                    <ActivityIcon size={28} className="text-blue-500" />
+                    <Beef size={28} className="text-blue-500" />
                   </div>
                   <div>
                     <p className="stat-label">Protein</p>
@@ -360,7 +361,7 @@ useEffect(() => {
                 </div>
                 <div className="stat-card stat-card-tertiary">
                   <div className="stat-icon-container stat-icon-tertiary">
-                    <ActivityIcon size={28} className="text-amber-500" />
+                    <Wheat size={28} className="text-amber-500" />
                   </div>
                   <div>
                     <p className="stat-label">Carbs</p>
@@ -369,7 +370,7 @@ useEffect(() => {
                 </div>
                 <div className="stat-card stat-card-quaternary p-3 bg-pink-50 rounded-lg flex items-center gap-3">
               <div className="stat-icon-container stat-icon-quaternary bg-pink-100 p-2 rounded-full">
-                <ActivityIcon size={28} className="text-pink-500" />
+                <Droplet size={28} className="text-pink-500" />
               </div>
               <div>
                 <p className="stat-label text-pink-600 font-medium">Fats</p>
@@ -400,24 +401,6 @@ useEffect(() => {
 
                   </div>
                 </Card>
-
-            </Card>
-
-
-            {/* Quick Actions */}
-            <Card>
-              <h2 className="quick-actions-title">Quick Actions</h2>
-              <div className="action-list">
-                {goalContent.quickActions.map((action, index) => (
-                  <button key={index} onClick={() => navigate(action.path)} className="action-button">
-                    <div className="flex items-center">
-                      <div className="action-icon-container">{action.icon}</div>
-                      <span className="action-label">{action.label}</span>
-                    </div>
-                    <ChevronRightIcon size={16} className="action-arrow" />
-                  </button>
-                ))}
-              </div>
             </Card>
           </div>
 

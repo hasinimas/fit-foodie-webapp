@@ -229,9 +229,9 @@
 .challenge-card {
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: rgb(254 243 199);
+  background-color: rgb(255, 235, 165);
   border-radius: 0.5rem;
-  border: 1px solid rgb(251 191 36);
+  border: 1px solid rgb(248, 239, 63);
 }
 .challenge-header {
   display: flex;
@@ -245,7 +245,7 @@
 }
 .challenge-badge {
   font-size: 0.75rem;
-  background-color: rgb(253 230 138);
+  background-color: rgb(218, 194, 100);
   color: rgb(146 64 14);
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
