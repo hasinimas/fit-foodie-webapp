@@ -35,6 +35,7 @@ export function App() {
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
           const plan = userDoc.data().plan || 'free';
+          console.log('App.tsx - User plan:', plan); // Debug log
           setUserPlan(plan.toLowerCase() === 'premium' ? 'Premium' : 'Free');
         } else {
           setUserPlan('Free');
@@ -42,10 +43,18 @@ export function App() {
       } else {
         setUserPlan('Free');
       }
-      setLoading(false);
     };
 
-    fetchUserPlan();
+    // Initial fetch
+    fetchUserPlan().then(() => setLoading(false));
+
+    // Set up an interval to check for plan updates every 3 seconds
+    const interval = setInterval(() => {
+      fetchUserPlan();
+    }, 3000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {

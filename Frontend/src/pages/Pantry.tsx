@@ -14,6 +14,7 @@ import {
   CakeIcon,
   AppleIcon,
   CoffeeIcon,
+  LockIcon,
 } from 'lucide-react';
 import '../styles/Pantry.css';
 import { db, auth } from '../firebaseConfig';
@@ -25,8 +26,10 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  getDoc,
 } from 'firebase/firestore';
 import { createNotification } from '../services/notificationService';
+import { useNavigate } from 'react-router-dom';
 
 interface PantryItem {
   id: string;
@@ -57,6 +60,9 @@ interface RecipeCard {
 }
 
 const Pantry: React.FC = () => {
+  const navigate = useNavigate();
+  const [isPremium, setIsPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'grocery' | 'pantry' | 'recipes'>('grocery');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
@@ -89,6 +95,44 @@ const Pantry: React.FC = () => {
    // Will fetch from OpenStreetMap (Nominatim)
   const [storeList, setStoreList] = useState<any[]>([]);
 
+  // Check if user is premium
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          setIsPremium(false);
+          return;
+        }
+
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const userPlan = userData.plan || 'free';
+          console.log('Pantry - User plan:', userPlan); // Debug log
+          setIsPremium(userPlan.toLowerCase() === 'premium');
+        } else {
+          setIsPremium(false);
+        }
+      } catch (error) {
+        console.error('Error checking premium status:', error);
+        setIsPremium(false);
+      }
+    };
+
+    // Initial check
+    checkPremiumStatus().then(() => setLoading(false));
+
+    // Set up an interval to check for plan updates every 3 seconds
+    const interval = setInterval(() => {
+      checkPremiumStatus();
+    }, 3000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, []);
 
     // Calculate distance using Haversine formula
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -210,8 +254,8 @@ const Pantry: React.FC = () => {
 
     const unsubscribePantry = onSnapshot(pantryRef, (snapshot) => {
       const pantryData = snapshot.docs.map((doc) => ({
-        id: doc.id,
         ...(doc.data() as PantryItem),
+        id: doc.id,
       }));
       setPantryItems(pantryData);
       
@@ -221,8 +265,8 @@ const Pantry: React.FC = () => {
 
     const unsubscribeGrocery = onSnapshot(groceryRef, (snapshot) => {
       const groceryData = snapshot.docs.map((doc) => ({
-        id: doc.id,
         ...(doc.data() as GroceryItem),
+        id: doc.id,
       }));
       setGroceryItems(groceryData);
     });
@@ -386,6 +430,42 @@ const Pantry: React.FC = () => {
 
   return (
     <Layout>
+      {loading ? (
+        <div className="flex items-center justify-center h-screen">
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      ) : !isPremium ? (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] p-8">
+          <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-full">
+                <LockIcon size={48} className="text-yellow-600 dark:text-yellow-400" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+              Premium Feature
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Smart Pantry is available exclusively for Premium members. Upgrade your plan to access inventory management, grocery lists, and recipe suggestions.
+            </p>
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate('/pricing')}
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
+              >
+                Upgrade to Premium
+              </Button>
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                variant="ghost"
+                className="w-full"
+              >
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="pantry-container">
         <div className="pantry-header">
           <div>
@@ -713,6 +793,7 @@ const Pantry: React.FC = () => {
           </div>
         )}
       </div>
+      )}
     </Layout>
   );
 };
