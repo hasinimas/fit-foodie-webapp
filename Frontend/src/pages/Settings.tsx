@@ -6,7 +6,9 @@ import { useTheme } from '../components/ThemeContext';
 import UpgradeToPremium from '../components/UpgradeToPremium';
 // @ts-ignore - firebaseConfig is a .js file
 import { db, auth } from '../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
+import { deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 import { ChevronLeftIcon, MoonIcon, SunIcon, GlobeIcon, BellIcon, ShieldIcon, TrashIcon, SaveIcon, CheckIcon } from 'lucide-react';
 const Settings: React.FC = () => {
@@ -14,7 +16,12 @@ const Settings: React.FC = () => {
   const [language, setLanguage] = useState('english');
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkUserPlan();
@@ -51,6 +58,75 @@ const Settings: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      alert('Please type DELETE to confirm');
+      return;
+    }
+
+    if (!userPassword.trim()) {
+      alert('Please enter your password to confirm deletion');
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !currentUser.email) {
+        alert('No user is currently logged in');
+        return;
+      }
+
+      // Re-authenticate user before deletion
+      const credential = EmailAuthProvider.credential(
+        currentUser.email,
+        userPassword
+      );
+      
+      await reauthenticateWithCredential(currentUser, credential);
+
+      // Delete user's subcollections (pantry, grocery, challenges, etc.)
+      const subcollections = ['pantry', 'grocery', 'challenges', 'mealPlans', 'notifications'];
+      
+      for (const subcollectionName of subcollections) {
+        const subcollectionRef = collection(db, 'users', currentUser.uid, subcollectionName);
+        const snapshot = await getDocs(subcollectionRef);
+        
+        // Delete all documents in the subcollection
+        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+      }
+
+      // Delete user document from Firestore
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await deleteDoc(userDocRef);
+
+      // Delete user from Firebase Authentication
+      await deleteUser(currentUser);
+
+      // Redirect to home page
+      alert('Your account has been successfully deleted');
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      
+      if (error.code === 'auth/wrong-password') {
+        alert('Incorrect password. Please try again.');
+      } else if (error.code === 'auth/invalid-credential') {
+        alert('Invalid credentials. Please check your password and try again.');
+      } else {
+        alert('Failed to delete account: ' + error.message);
+      }
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+      setDeleteConfirmText('');
+      setUserPassword('');
+    }
+  };
+
   return <Layout>
       <div className="max-w-4xl mx-auto">
         <button onClick={() => history.back()}
@@ -414,37 +490,6 @@ const Settings: React.FC = () => {
                 </h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-medium text-gray-800 dark:text-white mb-3">
-                      Personal Information
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                          Full Name
-                        </label>
-                        <input type="text" defaultValue="Ravi Kumar" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700  dark:text-white mb-1">
-                          Email Address
-                        </label>
-                        <input type="email" defaultValue="ravi.kumar@example.com" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                          Phone Number (optional)
-                        </label>
-                        <input type="tel" placeholder="+94 123 456 789" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                          Location
-                        </label>
-                        <input type="text" defaultValue="Kandy, Sri Lanka" className="w-full rounded-lg border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
                     <h3 className="font-medium text-gray-800 mb-3">
                       Subscription
                     </h3>
@@ -498,19 +543,84 @@ const Settings: React.FC = () => {
                         Permanently delete your account and all associated data.
                         This action cannot be undone.
                       </p>
-                      <Button variant="outline" size="sm" icon={<TrashIcon size={14} />}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        icon={<TrashIcon size={14} />}
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
                         Delete Account
                       </Button>
                     </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button icon={<SaveIcon size={16} />}>Save Changes</Button>
                   </div>
                 </div>
               </Card>}
           </div>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      {showDeleteDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <h2 className="text-xl font-bold text-red-600 mb-4">Delete Account</h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
+              This action is <strong>permanent</strong> and cannot be undone. All your data including:
+            </p>
+            <ul className="list-disc list-inside text-gray-600 dark:text-gray-400 mb-4 space-y-1">
+              <li>Meal plans and logs</li>
+              <li>Pantry and grocery lists</li>
+              <li>Challenge progress</li>
+              <li>Profile information</li>
+              <li>Subscription details</li>
+            </ul>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
+              will be permanently deleted.
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 mb-2">
+              Type <strong className="text-red-600">DELETE</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 mb-4 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            />
+            <p className="text-gray-700 dark:text-gray-300 mb-2">
+              Enter your password to confirm:
+            </p>
+            <input
+              type="password"
+              value={userPassword}
+              onChange={(e) => setUserPassword(e.target.value)}
+              placeholder="Your password"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 mb-6 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDeleteConfirmText('');
+                  setUserPassword('');
+                }}
+                className="flex-1"
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteAccount}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                disabled={isDeleting || deleteConfirmText !== 'DELETE' || !userPassword.trim()}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>;
 };
 export default Settings;
