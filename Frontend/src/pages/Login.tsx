@@ -12,6 +12,8 @@ const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
 
   interface FormData {
   firstName: string;
@@ -81,12 +83,13 @@ const Login: React.FC = () => {
     // 🔐 Login existing user
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      setMessage({ type: 'success', text: 'Login successful!' });
       navigate("/dashboard");
     } catch (error: any) {
-      alert("Login failed: " + error.message);
+      setMessage({ type: 'error', text: "Login failed: " + error.message });
     }
   } else {
-    // 🆕 Register new user
+    // Register new user
     if (currentStep < 3) {
       handleNextStep();
       return;
@@ -109,11 +112,10 @@ const Login: React.FC = () => {
         plan: "free", // Default plan for new users
         createdAt: new Date().toISOString(),
       });
-
-      alert("Account created successfully!");
+      setMessage({ type: 'success', text: 'Account created successfully!' });
       navigate("/onboarding");
     } catch (error: any) {
-      alert("Registration failed: " + error.message);
+      setMessage({ type: 'error', text: "Registration failed: " + error.message });
     }
   }
 };

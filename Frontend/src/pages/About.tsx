@@ -163,9 +163,9 @@ const About: React.FC = () => {
             </Button>
           </Link>
           <Link to="/features">
-            <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100">
-              Explore Features
-            </Button>
+            <Button size="lg" className="bg-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 font-bold shadow-2xl border-2 border-white transform hover:scale-105 transition-all">
+               Explore Features
+            </Button>
           </Link>
         </div>
       </section>

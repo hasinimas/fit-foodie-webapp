@@ -183,14 +183,14 @@ const Profile: React.FC = () => {
           </div>
 
           <div className="flex gap-3">
-            <Button
-              className="bg-white text-emerald-600 hover:bg-gray-100 shadow-md"
+           <Button
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold px-6 py-3"
               onClick={() => setIsEditing(true)}
             >
-              Edit Profile
+              ✏ Edit Profile
             </Button>
             <Button
-              className="bg-red-500 text-white hover:bg-red-600 shadow-md"
+              className="bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold px-6 py-3"
               onClick={() => {
                 auth.signOut().then(() => {
                   alert("Logged out successfully!");
@@ -198,7 +198,7 @@ const Profile: React.FC = () => {
                 });
               }}
             >
-              Log Out
+              🚪 Log Out
             </Button>
           </div>
         </div>
